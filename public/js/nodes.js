@@ -1,27 +1,26 @@
 export default {
     template: `
       <div>
-      <v-simple-table>
-        <template v-slot:default>
-          <thead>
+      <v-data-table :headers="headers" :items="nodes" @click:row="handleClick">
+        <template slot="items" slot-scope="props">
           <tr>
-            <th class="text-left">ID</th>
-            <th class="text-left">class</th>
+            <td>
+              <v-checkbox v-model="props.selected" primary hide-details></v-checkbox>
+            </td>
+            <td>{{ props.item.id }}</td>
+            <td>{{ props.item.deviceClass}}</td>
           </tr>
-          </thead>
-          <tbody>
-          <tr v-for="node in nodes" :key="node.id">
-            <td>{{ node.id }}</td>
-            <td>{{ node.deviceClass }}</td>
-          </tr>
-          </tbody>
         </template>
-      </v-simple-table>
+      </v-data-table>
       </div>
     `,
     data() {
         return {
             loading: false,
+            headers: [
+                { text: 'ID', align: 'left', value: 'id', class: 'tableheader'},
+                { text: 'Class', align: 'left', value: 'deviceClass', class: 'tableheader'},
+            ],
             nodes: []
         }
     },
@@ -34,6 +33,9 @@ export default {
             const resp = await fetch(`/api/nodes`);
             this.nodes = await resp.json();
             this.loading = false;
-        }
+        },
+        handleClick(row) {
+            console.log(row);
+        },
     }
 }

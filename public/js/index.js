@@ -12,5 +12,6 @@ const router = new VueRouter({
 })
 
 const app = new Vue({
-    router
+    router,
+    vuetify: new Vuetify(),
 }).$mount('#app')
