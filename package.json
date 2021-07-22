@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
+    "vue": "^2.6.14",
     "zwave-js": "^8.0.5"
   }
 }

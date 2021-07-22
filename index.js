@@ -4,7 +4,10 @@ const app = express()
 
 const nodes = [];
 
-app.get('/nodes', async (req, res) => {
+app.use(express.static('node_modules'))
+app.use(express.static('public'))
+
+app.get('/api/nodes', async (req, res) => {
     res.header("Content-Type",'application/json');
     res.send(JSON.stringify(nodes, null, 3));
 });
@@ -24,12 +27,12 @@ app.get('/nodes', async (req, res) => {
         for(let id of driver.controller.nodes.keys()) {
             const node = driver.controller.nodes.get(id);
             if(id === 5) {
-                node.setValue({
-                    commandClass: 67,
-                    endpoint: 0,
-                    property: 'setpoint',
-                    propertyKey: 2,
-                }, 73);
+                // node.setValue({
+                //     commandClass: 67,
+                //     endpoint: 0,
+                //     property: 'setpoint',
+                //     propertyKey: 2,
+                // }, 73);
             }
             const values = node.getDefinedValueIDs().map(it => {
                 const valueId = {
@@ -51,8 +54,13 @@ app.get('/nodes', async (req, res) => {
         }
     });
     await driver.start();
-})();
 
-// driver.destroy();
+    process.on('exit', function () {
+        console.log('Destroying driver...');
+        driver.destroy();
+        console.log('Destroyed');
+    });
+    console.log('Registered shutdown hook.');
+})();
 
 app.listen(3001)
