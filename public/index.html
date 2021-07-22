@@ -1,11 +1,16 @@
 <html>
     <head>
         <script src="vue/dist/vue.js"></script>
+        <script src="vue-router/dist/vue-router.js"></script>
         <script type="module" src="js/index.js"></script>
     </head>
 <body>
 <div id="app">
-    {{ message }}
-</div>
-</body>
+    <h1>Hello App!</h1>
+    <p>
+        <router-link to="/foo">Go to Foo</router-link>
+        <router-link to="/bar">Go to Bar</router-link>
+    </p>
+    <router-view></router-view>
+</div></body>
 </html>
