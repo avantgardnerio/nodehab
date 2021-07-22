@@ -23,13 +23,21 @@ app.get('/nodes', async (req, res) => {
 
         for(let id of driver.controller.nodes.keys()) {
             const node = driver.controller.nodes.get(id);
+            if(id === 5) {
+                node.setValue({
+                    commandClass: 67,
+                    endpoint: 0,
+                    property: 'setpoint',
+                    propertyKey: 2,
+                }, 73);
+            }
             const values = node.getDefinedValueIDs().map(it => {
                 const valueId = {
                     commandClass: it.commandClass,
                     property: it.property,
                 };
                 const val = node.getValue(valueId);
-                return {...valueId, val};
+                return {...it, val};
             });
             node.once("ready", async () => {
                 nodes.push({
