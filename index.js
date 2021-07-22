@@ -23,11 +23,19 @@ app.get('/nodes', async (req, res) => {
 
         for(let id of driver.controller.nodes.keys()) {
             const node = driver.controller.nodes.get(id);
+            const values = node.getDefinedValueIDs().map(it => {
+                const valueId = {
+                    commandClass: it.commandClass,
+                    property: it.property,
+                };
+                const val = node.getValue(valueId);
+                return {...valueId, val};
+            });
             node.once("ready", async () => {
                 nodes.push({
                     id,
                     deviceClass: node.deviceClass.specific.label,
-                    values: node.getDefinedValueIDs(),
+                    values,
                 });
                 // e.g. perform a BasicCC::Set with target value 50
                 // await node.commandClasses.Basic.set(50);
