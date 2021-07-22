@@ -23,7 +23,7 @@ app.get('/nodes', async (req, res) => {
         for(let id of driver.controller.nodes.keys()) {
             const node = driver.controller.nodes.get(id);
             node.once("ready", async () => {
-                nodes.push({id});
+                nodes.push({id, deviceClass: node.deviceClass.specific.label});
                 // e.g. perform a BasicCC::Set with target value 50
                 // await node.commandClasses.Basic.set(50);
             });
