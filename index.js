@@ -5,7 +5,8 @@ const app = express()
 const nodes = [];
 
 app.get('/nodes', async (req, res) => {
-    res.json(nodes);
+    res.header("Content-Type",'application/json');
+    res.send(JSON.stringify(nodes, null, 3));
 });
 
 // https://zwave-js.github.io/node-zwave-js/#/getting-started/quickstart
@@ -23,7 +24,11 @@ app.get('/nodes', async (req, res) => {
         for(let id of driver.controller.nodes.keys()) {
             const node = driver.controller.nodes.get(id);
             node.once("ready", async () => {
-                nodes.push({id, deviceClass: node.deviceClass.specific.label});
+                nodes.push({
+                    id,
+                    deviceClass: node.deviceClass.specific.label,
+                    values: node.getDefinedValueIDs(),
+                });
                 // e.g. perform a BasicCC::Set with target value 50
                 // await node.commandClasses.Basic.set(50);
             });
