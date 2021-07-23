@@ -1,13 +1,41 @@
 export default {
     template: `
       <div>
-      <v-data-table :headers="headers" :items="values" @click:row="handleClick">
+      <v-data-table :headers="headers" :items="values">
+        <template v-slot:item.val="props">
+          <v-edit-dialog
+              :return-value.sync="props.item.val"
+              @save="save"
+              @cancel="cancel"
+              @open="open"
+              @close="close"
+          >
+            {{ props.item.val }}
+            <template v-slot:input>
+              <v-text-field
+                  v-model="props.item.val"
+                  label="Edit"
+                  single-line
+                  counter
+              ></v-text-field>
+            </template>
+          </v-edit-dialog>
+        </template>
       </v-data-table>
+      <v-snackbar v-model="snack" :timeout="3000" :color="snackColor" >
+        {{ snackText }}
+        <template v-slot:action="{ attrs }">
+          <v-btn v-bind="attrs" text @click="snack = false">Close</v-btn>
+        </template>
+      </v-snackbar>
       </div>
     `,
     data() {
         return {
             loading: false,
+            snack: false,
+            snackColor: '',
+            snackText: '',
             headers: [
                 { text: 'Command Class', align: 'left', value: 'commandClassName', class: 'tableheader'},
                 { text: 'Property', align: 'left', value: 'prop', class: 'tableheader'},
@@ -31,5 +59,23 @@ export default {
             console.log(row.id);
             this.$router.push(`/nodes/${row.id}`);
         },
-    }
+        save () {
+            this.snack = true
+            this.snackColor = 'success'
+            this.snackText = 'Data saved'
+        },
+        cancel () {
+            this.snack = true
+            this.snackColor = 'error'
+            this.snackText = 'Canceled'
+        },
+        open () {
+            this.snack = true
+            this.snackColor = 'info'
+            this.snackText = 'Dialog opened'
+        },
+        close () {
+            console.log('Dialog closed')
+        },
+    },
 }
