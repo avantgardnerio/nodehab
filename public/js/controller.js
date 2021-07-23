@@ -1,8 +1,9 @@
 export default {
     template: `
       <div>
+      <v-btn v-on:click="beginInclude">Include a node...</v-btn>
       <v-btn v-on:click="beginExclude">Exclude a node...</v-btn>
-      <v-data-table :headers="headers" :items="nodes" @click:row="handleClick">
+      <v-data-table :headers="headers" :items="nodes" @click:row="handleClick" :items-per-page="15">
         <template slot="items" slot-scope="props">
           <tr>
             <td>
@@ -44,6 +45,12 @@ export default {
                 method: 'POST'
             });
             console.log(`beginExclude()=${result}`);
-        }
+        },
+        async beginInclude() {
+            const result = await fetch(`/nodes/include`, {
+                method: 'POST'
+            });
+            console.log(`beginInclude()=${result}`);
+        },
     }
 }

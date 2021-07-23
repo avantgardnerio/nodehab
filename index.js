@@ -32,6 +32,12 @@ app.post('/nodes/exclude', async (req, res) => {
     res.send(JSON.stringify(result, null, 3));
 });
 
+app.post('/nodes/include', async (req, res) => {
+    const result = await driver.controller.beginInclusion(true);
+    res.header("Content-Type",'application/json');
+    res.send(JSON.stringify(result, null, 3));
+});
+
 app.get('/api/nodes/:id', async (req, res) => {
     const node = driver.controller.nodes.get(parseInt(req.params.id));
     const values = node.getDefinedValueIDs().map(it => {

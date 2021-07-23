@@ -1,7 +1,7 @@
 export default {
     template: `
       <div>
-      <v-data-table :headers="headers" :items="values">
+      <v-data-table :headers="headers" :items="values" :items-per-page="15">
         <template v-slot:item.val="props">
           <v-edit-dialog :return-value.sync="props.item.val" @save="save" @cancel="cancel" @open="open" @close="close" >
             {{ props.item.val }}
