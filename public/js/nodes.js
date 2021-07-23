@@ -35,7 +35,8 @@ export default {
             this.loading = false;
         },
         handleClick(row) {
-            console.log(row);
+            console.log(row.id);
+            this.$router.push(`/nodes/${row.id}`);
         },
     }
 }

@@ -1,10 +1,9 @@
 import Nodes from './nodes.js';
-
-const Bar = { template: '<div>bar</div>' }
+import Node from './node.js';
 
 const routes = [
     { path: '/nodes', component: Nodes },
-    { path: '/bar', component: Bar }
+    { path: '/nodes/:id', component: Node }
 ]
 
 const router = new VueRouter({
