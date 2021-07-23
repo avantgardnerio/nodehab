@@ -1,5 +1,6 @@
 const { Driver } = require("zwave-js");
 const express = require('express')
+const bodyParser = require('body-parser')
 const app = express()
 
 const driver = new Driver("/dev/ttyACM0");
@@ -7,6 +8,7 @@ driver.on("error", (e) => {
     console.error(e); // You must add a handler for the error event before starting the driver
 });
 
+app.use(bodyParser());
 app.use(express.static('node_modules'))
 app.use(express.static('public'))
 
@@ -39,20 +41,21 @@ app.get('/api/nodes/:id', async (req, res) => {
     res.send(JSON.stringify(values, null, 3));
 });
 
+app.put('/api/nodes/:id', async (req, res) => {
+    const node = driver.controller.nodes.get(parseInt(req.params.id));
+    const row = req.body;
+    console.log(row);
+    node.setValue({
+        commandClass: row.commandClass,
+        endpoint: row.endpoint,
+        property: row.property,
+        propertyKey: row.propertyKey,
+    }, parseInt(row.val));
+});
+
 // https://zwave-js.github.io/node-zwave-js/#/getting-started/quickstart
 (async () => {
     driver.once("driver ready", () => {
-        for(let id of driver.controller.nodes.keys()) {
-            const node = driver.controller.nodes.get(id);
-            if(id === 5) {
-                // node.setValue({
-                //     commandClass: 67,
-                //     endpoint: 0,
-                //     property: 'setpoint',
-                //     propertyKey: 2,
-                // }, 73);
-            }
-        }
     });
     await driver.start();
 

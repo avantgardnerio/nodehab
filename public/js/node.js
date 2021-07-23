@@ -3,20 +3,11 @@ export default {
       <div>
       <v-data-table :headers="headers" :items="values">
         <template v-slot:item.val="props">
-          <v-edit-dialog
-              :return-value.sync="props.item.val"
-              @save="save"
-              @cancel="cancel"
-              @open="open"
-              @close="close"
-          >
+          <v-edit-dialog :return-value.sync="props.item.val" @save="save" @cancel="cancel" @open="open" @close="close" >
             {{ props.item.val }}
             <template v-slot:input>
-              <v-text-field
-                  v-model="props.item.val"
-                  label="Edit"
-                  single-line
-                  counter
+              <v-text-field v-model="props.item.val" label="Edit" single-line counter
+                            @keyup.enter="onUpdateCourse(props.item)"
               ></v-text-field>
             </template>
           </v-edit-dialog>
@@ -55,11 +46,14 @@ export default {
             this.values.forEach(it => it.prop = it.propertyKeyName || it.propertyName || it.property);
             this.loading = false;
         },
-        handleClick(row) {
-            console.log(row.id);
-            this.$router.push(`/nodes/${row.id}`);
+        async onUpdateCourse(row) {
+            await fetch(`/api/nodes/${this.$route.params.id}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(row),
+            });
         },
-        save () {
+        save() {
             this.snack = true
             this.snackColor = 'success'
             this.snackText = 'Data saved'
