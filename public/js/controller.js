@@ -1,6 +1,7 @@
 export default {
     template: `
       <div>
+      <v-btn v-on:click="beginExclude">Exclude a node...</v-btn>
       <v-data-table :headers="headers" :items="nodes" @click:row="handleClick">
         <template slot="items" slot-scope="props">
           <tr>
@@ -38,5 +39,11 @@ export default {
             console.log(row.id);
             this.$router.push(`/nodes/${row.id}`);
         },
+        async beginExclude() {
+            const result = await fetch(`/nodes/exclude`, {
+                method: 'POST'
+            });
+            console.log(`beginExclude()=${result}`);
+        }
     }
 }

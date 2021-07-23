@@ -1,8 +1,8 @@
-import Nodes from './nodes.js';
+import Controller from './controller.js';
 import Node from './node.js';
 
 const routes = [
-    { path: '/nodes', component: Nodes },
+    { path: '/controller', component: Controller },
     { path: '/nodes/:id', component: Node }
 ]
 
