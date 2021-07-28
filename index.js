@@ -3,7 +3,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
 
-const driver = new Driver("/dev/ttyACM0");
+const driver = new Driver("/dev/ttyUSB0");
 driver.on("error", (e) => {
     console.error(e); // You must add a handler for the error event before starting the driver
 });
