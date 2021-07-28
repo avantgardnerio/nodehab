@@ -29,6 +29,7 @@ app.get('/api/nodes', async (req, res) => {
 app.post('/nodes/exclude', async (req, res) => {
     const result = await driver.controller.beginExclusion();
     res.header("Content-Type",'application/json');
+    console.log(`Excluding: `, result);
     res.send(JSON.stringify(result, null, 3));
 });
 
