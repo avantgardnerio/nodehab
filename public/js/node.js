@@ -44,9 +44,16 @@ export default {
             const resp = await fetch(`/api/nodes/${this.$route.params.id}`);
             this.values = await resp.json();
             this.values.forEach(it => it.prop = it.propertyKeyName || it.propertyName || it.property);
+            this.values.forEach(it => it.orig = it.val);
             this.loading = false;
         },
         async onUpdateCourse(row) {
+            if(typeof row.orig === 'boolean') {
+                row.val = row.val === true || row.val === 'true';
+            } else if(typeof row.orig === 'number') {
+                row.val = parseFloat(row.val);
+            }
+            console.log(`${new Date()} setting ${row.commandClass} ${row.prop} to ${row.val}`);
             await fetch(`/api/nodes/${this.$route.params.id}`, {
                 method: 'PUT',
                 headers: {'Content-Type': 'application/json'},

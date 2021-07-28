@@ -56,13 +56,13 @@ app.get('/api/nodes/:id', async (req, res) => {
 app.put('/api/nodes/:id', async (req, res) => {
     const node = driver.controller.nodes.get(parseInt(req.params.id));
     const row = req.body;
-    console.log(row);
+    console.log(`${new Date()} setting ${row.commandClass} ${row.prop} to ${row.val}`);
     node.setValue({
         commandClass: row.commandClass,
         endpoint: row.endpoint,
         property: row.property,
         propertyKey: row.propertyKey,
-    }, parseInt(row.val));
+    }, row.val);
 });
 
 // https://zwave-js.github.io/node-zwave-js/#/getting-started/quickstart
