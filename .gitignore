@@ -4,3 +4,6 @@
 *.iws
 
 node_modules/
+
+*.json
+data/

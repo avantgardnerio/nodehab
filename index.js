@@ -1,9 +1,13 @@
 const { Driver } = require("zwave-js");
+const fs = require('fs');
 const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
 
-const driver = new Driver("/dev/ttyUSB0");
+const config = JSON.parse(fs.readFileSync('./data/config.json'));
+
+let ready = false;
+const driver = new Driver(config.controllerAddress);
 driver.on("error", (e) => {
     console.error(e); // You must add a handler for the error event before starting the driver
 });
@@ -14,12 +18,16 @@ app.use(express.static('public'))
 
 app.get('/api/nodes', async (req, res) => {
     const nodes = [];
-    for(let id of driver.controller.nodes.keys()) {
-        const node = driver.controller.nodes.get(id);
-        nodes.push({
-            id: node.id,
-            deviceClass: node.deviceClass.specific.label,
-        });
+
+    if(ready) {
+        for(let id of driver.controller.nodes.keys()) {
+            const node = driver.controller.nodes.get(id);
+            nodes.push({
+                id: node.id,
+                nickname: config.nodes[id],
+                deviceClass: node.deviceClass.specific.label,
+            });
+        }
     }
 
     res.header("Content-Type",'application/json');
@@ -70,6 +78,7 @@ app.put('/api/nodes/:id', async (req, res) => {
 // https://zwave-js.github.io/node-zwave-js/#/getting-started/quickstart
 (async () => {
     driver.once("driver ready", () => {
+        ready = true;
     });
     await driver.start();
 

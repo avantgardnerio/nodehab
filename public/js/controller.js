@@ -21,6 +21,7 @@ export default {
             loading: false,
             headers: [
                 { text: 'ID', align: 'left', value: 'id', class: 'tableheader'},
+                { text: 'Nickname', align: 'left', value: 'nickname', class: 'tableheader'},
                 { text: 'Class', align: 'left', value: 'deviceClass', class: 'tableheader'},
             ],
             nodes: []
