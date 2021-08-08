@@ -63,6 +63,23 @@ app.get('/api/nodes/:id', async (req, res) => {
     res.send(JSON.stringify(values, null, 3));
 });
 
+app.get('/api/nodes/:id/failed', async (req, res) => {
+    console.log(`Checking if node ${req.params.id} failed...`);
+    const isFailed = await driver.controller.isFailedNode(req.params.id);
+    console.log(`Node ${req.params.id} failed: ${isFailed}`);
+    res.header("Content-Type",'application/json');
+    res.send(JSON.stringify(isFailed, null, 3));
+});
+
+app.post('/api/nodes/:id/remove', async (req, res) => {
+    const nodeId = parseInt(req.params.id);
+    console.log(`Removing node ${req.params.id}...`);
+    const result = await driver.controller.removeFailedNode(nodeId);
+    res.header("Content-Type",'application/json');
+    console.log(`Remove node result: `, result);
+    res.send(JSON.stringify(result, null, 3));
+});
+
 app.put('/api/nodes/:id', async (req, res) => {
     const node = driver.controller.nodes.get(parseInt(req.params.id));
     const row = req.body;

@@ -1,6 +1,7 @@
 export default {
     template: `
       <div>
+      <v-btn v-on:click="failedClick">{{failedMsg}}</v-btn>
       <v-data-table :headers="headers" :items="values" :items-per-page="15">
         <template v-slot:item.val="props">
           <v-edit-dialog :return-value.sync="props.item.val" @save="save" @cancel="cancel" @open="open" @close="close" >
@@ -27,6 +28,7 @@ export default {
             snack: false,
             snackColor: '',
             snackText: '',
+            failedMsg: 'Has node failed?',
             headers: [
                 { text: 'Command Class', align: 'left', value: 'commandClassName', class: 'tableheader'},
                 { text: 'Property', align: 'left', value: 'prop', class: 'tableheader'},
@@ -76,7 +78,20 @@ export default {
             this.snackText = 'Dialog opened'
         },
         close () {
-            console.log('Dialog closed')
+            console.log('Dialog closed');
         },
+        async failedClick() {
+            if(this.failedMsg.includes('failed?')) {
+                this.failedMsg = 'Checking node failure...';
+                const resp = await fetch(`/api/nodes/${this.$route.params.id}/failed`);
+                const isFailed = await resp.json();
+                this.failedMsg = isFailed ? 'Remove failed node' : 'Node is healthy';
+                return;
+            }
+            if(this.failedMsg.toLowerCase().includes('remove')) {
+                await fetch(`/api/nodes/${this.$route.params.id}/remove`, {method: 'POST'});
+                this.$router.push(`/controller`);
+            }
+        }
     },
 }
