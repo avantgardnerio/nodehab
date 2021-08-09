@@ -5,9 +5,13 @@ const bodyParser = require('body-parser')
 const app = express()
 
 const config = JSON.parse(fs.readFileSync('./data/config.json'));
+const networkKey = Buffer.from(config.networkKey, "hex");
+const options = {
+    networkKey,
+};
 
 let ready = false;
-const driver = new Driver(config.controllerAddress);
+const driver = new Driver(config.controllerAddress, options);
 driver.on("error", (e) => {
     console.error(e); // You must add a handler for the error event before starting the driver
 });
