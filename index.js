@@ -103,8 +103,12 @@ app.get('/api/dashboard', async (req, res) => {
     for(let obj of dashboard) {
         if(obj.driver === 'zwave') {
             const node = driver.controller.nodes.get(obj.node);
-            obj.current = await node.getValue({commandClass: obj.commandClass, endpoint: obj.endpoint, property: "currentValue"});
-            obj.target = await node.getValue({commandClass: obj.commandClass, endpoint: obj.endpoint, property: "targetValue"});
+            if(obj.read) {
+                obj.current = await node.getValue({commandClass: obj.commandClass, endpoint: obj.endpoint, property: obj.read});
+            }
+            if(obj.write) {
+                obj.target = await node.getValue({commandClass: obj.commandClass, endpoint: obj.endpoint, property: obj.write});
+            }
         }
     }
     res.header("Content-Type",'application/json');
