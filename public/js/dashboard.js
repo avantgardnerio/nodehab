@@ -7,7 +7,7 @@ export default {
           <v-text-field v-if="item.type === 'int'" v-model="item.current" type="number" label="Number" disabled></v-text-field>
         </template>
         <template v-slot:item.target="{ item }">
-          <v-switch v-if="item.type === 'switch'" v-model="item.target"></v-switch>
+          <v-switch v-if="item.type === 'switch'" v-model="item.target" @change="onChange(item)"></v-switch>
           <v-text-field v-if="item.type === 'int'" v-model="item.target" type="number" label="Number"></v-text-field>
         </template>
       </v-data-table>
@@ -37,5 +37,14 @@ export default {
             this.values = await resp.json();
             this.loading = false;
         },
+        async onChange(item) {
+            const obj = {commandClass: item.commandClass, endpoint: item.endpoint, property: "targetValue", val: item.target};
+            console.log(obj);
+            await fetch(`/api/nodes/${item.node}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(obj),
+            });
+        }
     },
 }
