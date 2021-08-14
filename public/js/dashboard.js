@@ -7,10 +7,12 @@ export default {
                     :true-value="item.trueValue" :false-value="item.falseValue"></v-switch>
           <v-text-field v-if="item.type === 'int'" v-model="item.current" type="number" label="Number" disabled 
                         ></v-text-field>
+          <v-select v-if="item.type === 'radio'" v-model="item.current" :items="item.options" disabled></v-select>
         </template>
         <template v-slot:item.target="{ item }" >
           <v-switch v-if="item.write !== undefined && item.type === 'switch'" v-model="item.target" @change="onChange(item)"></v-switch>
           <v-text-field v-if="item.write !== undefined && item.type === 'int'" v-model="item.target" type="number" label="Number"></v-text-field>
+          <v-select v-if="item.type === 'radio'" v-model="item.target" :items="item.options" @change="onChange(item)"></v-select>
         </template>
       </v-data-table>
       </div>
@@ -40,7 +42,7 @@ export default {
             this.loading = false;
         },
         async onChange(item) {
-            const obj = {commandClass: item.commandClass, endpoint: item.endpoint, property: "targetValue", val: item.target};
+            const obj = {commandClass: item.commandClass, endpoint: item.endpoint, property: item.write, val: item.target};
             console.log(obj);
             await fetch(`/api/nodes/${item.node}`, {
                 method: 'PUT',
