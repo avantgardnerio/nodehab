@@ -8,9 +8,9 @@ export default {
           <v-text-field v-if="item.type === 'int'" v-model="item.current" type="number" label="Number" disabled 
                         ></v-text-field>
         </template>
-        <template v-slot:item.target="{ item }">
-          <v-switch v-if="item.type === 'switch'" v-model="item.target" @change="onChange(item)"></v-switch>
-          <v-text-field v-if="item.type === 'int'" v-model="item.target" type="number" label="Number"></v-text-field>
+        <template v-slot:item.target="{ item }" >
+          <v-switch v-if="item.write !== undefined && item.type === 'switch'" v-model="item.target" @change="onChange(item)"></v-switch>
+          <v-text-field v-if="item.write !== undefined && item.type === 'int'" v-model="item.target" type="number" label="Number"></v-text-field>
         </template>
       </v-data-table>
       </div>
