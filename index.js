@@ -2,7 +2,8 @@ const { Driver } = require("zwave-js");
 const fs = require('fs');
 const express = require('express')
 const bodyParser = require('body-parser')
-const app = express()
+const app = express();
+require('express-async-errors');
 
 const config = JSON.parse(fs.readFileSync('./data/config.json'));
 const networkKey = Buffer.from(config.networkKey, "hex");
@@ -88,12 +89,30 @@ app.put('/api/nodes/:id', async (req, res) => {
     const node = driver.controller.nodes.get(parseInt(req.params.id));
     const row = req.body;
     console.log(`${new Date()} setting ${row.commandClass} ${row.prop} to ${row.val}`);
-    node.setValue({
+    await node.setValue({
         commandClass: row.commandClass,
         endpoint: row.endpoint,
         property: row.property,
         propertyKey: row.propertyKey,
     }, row.val);
+    res.send(JSON.stringify(true));
+});
+
+app.get('/api/dashboard', async (req, res) => {
+    const dashboard = config.dashboard.map(it => ({...it}));
+    for(let obj of dashboard) {
+        if(obj.driver === 'zwave') {
+            const node = driver.controller.nodes.get(obj.node);
+            obj.current = await node.getValue({commandClass: obj.commandClass, endpoint: obj.endpoint, property: "currentValue"});
+            obj.target = await node.getValue({commandClass: obj.commandClass, endpoint: obj.endpoint, property: "targetValue"});
+        }
+    }
+    res.header("Content-Type",'application/json');
+    res.send(JSON.stringify(dashboard));
+});
+
+app.use((error, req, res, next) => {
+    return res.status(500).json({ error: error.toString() });
 });
 
 // https://zwave-js.github.io/node-zwave-js/#/getting-started/quickstart

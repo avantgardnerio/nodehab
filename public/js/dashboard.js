@@ -24,16 +24,7 @@ export default {
                 { text: 'Current', align: 'left', value: 'current', class: 'tableheader'},
                 { text: 'Target', align: 'left', value: 'target', class: 'tableheader'},
             ],
-            values: [
-                {name: "Front lock", type: "switch", current: false, target: false},
-                {name: "Garage lock", type: "switch", current: false, target: false},
-                {name: "Garage door", type: "switch", current: false, target: false},
-                {name: "Master bath fan", type: "switch", current: false, target: false},
-                {name: "Main bath fan", type: "switch", current: false, target: false},
-                {name: "Master bed temp", type: "int", current: 77, target: 77},
-                {name: "Main floor temp", type: "int", current: 75, target: 75},
-                {name: "Ground floor temp", type: "int", current: 72, target: 72},
-            ]
+            values: []
         }
     },
     created() {
@@ -42,8 +33,8 @@ export default {
     methods: {
         async getDataFromApi() {
             this.loading = true
-            const resp = await fetch(`/api/nodes`);
-            // this.values = await resp.json();
+            const resp = await fetch(`/api/dashboard`);
+            this.values = await resp.json();
             this.loading = false;
         },
     },
