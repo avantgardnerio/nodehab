@@ -3,8 +3,10 @@ export default {
       <div>
       <v-data-table :headers="headers" :items="values" :items-per-page="15">
         <template v-slot:item.current="{ item }">
-          <v-switch v-if="item.type === 'switch'" v-model="item.current" disabled></v-switch>
-          <v-text-field v-if="item.type === 'int'" v-model="item.current" type="number" label="Number" disabled></v-text-field>
+          <v-switch v-if="item.type === 'switch'" v-model="item.current" disabled
+                    :true-value="item.trueValue" :false-value="item.falseValue"></v-switch>
+          <v-text-field v-if="item.type === 'int'" v-model="item.current" type="number" label="Number" disabled 
+                        ></v-text-field>
         </template>
         <template v-slot:item.target="{ item }">
           <v-switch v-if="item.type === 'switch'" v-model="item.target" @change="onChange(item)"></v-switch>
