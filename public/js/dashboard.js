@@ -10,8 +10,9 @@ export default {
           <v-select v-if="item.type === 'radio'" v-model="item.current" :items="item.options" disabled></v-select>
         </template>
         <template v-slot:item.target="{ item }" >
-          <v-switch v-if="item.write !== undefined && item.type === 'switch'" v-model="item.target" @change="onChange(item)"></v-switch>
-          <v-text-field v-if="item.write !== undefined && item.type === 'int'" v-model="item.target" type="number" label="Number"></v-text-field>
+          <v-switch v-if="item.write !== undefined && item.type === 'switch'" v-model="item.target" @change="onChange(item)"
+                    :true-value="item.trueValue" :false-value="item.falseValue"></v-switch>
+          <v-text-field v-if="item.write !== undefined && item.type === 'int'" v-model="item.target" type="number" label="Number" @change="onChange(item)"></v-text-field>
           <v-select v-if="item.type === 'radio'" v-model="item.target" :items="item.options" @change="onChange(item)"></v-select>
         </template>
       </v-data-table>
@@ -42,6 +43,9 @@ export default {
             this.loading = false;
         },
         async onChange(item) {
+            if(item.type === 'int') {
+                item.target = parseInt(item.target);
+            }
             const obj = {commandClass: item.commandClass, endpoint: item.endpoint, property: item.write, val: item.target};
             console.log(obj);
             await fetch(`/api/nodes/${item.node}`, {
