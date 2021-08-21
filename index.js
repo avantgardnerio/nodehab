@@ -123,6 +123,13 @@ app.use((error, req, res, next) => {
 (async () => {
     driver.once("driver ready", () => {
         ready = true;
+        for(let tuple of driver.controller.nodes) {
+            const node = tuple[1];
+            node.on('value updated', (node, args) => {
+                if(!node.ready) return;
+                console.log(`value updated node=${node.nodeId} args=${JSON.stringify(args, undefined, 2)}`);
+            });
+        }
     });
     await driver.start();
 
