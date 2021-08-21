@@ -1,7 +1,7 @@
 export default {
     template: `
       <div>
-      <v-data-table :headers="headers" :items="values" :items-per-page="15">
+      <v-data-table :headers="headers" :items="values" :items-per-page="20">
         <template v-slot:item.current="{ item }">
           <v-switch v-if="item.type === 'switch'" v-model="item.current" disabled
                     :true-value="item.trueValue" :false-value="item.falseValue"></v-switch>
