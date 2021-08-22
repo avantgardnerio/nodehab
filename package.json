@@ -14,6 +14,8 @@
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
     "nodemon": "^2.0.12",
+    "sqlite": "^4.0.23",
+    "sqlite3": "^5.0.2",
     "vue": "^2.6.14",
     "vue-router": "^3.5.2",
     "vuetify": "^2.5.7",
