@@ -4,6 +4,7 @@
 *.iws
 
 node_modules/
+.env
 
 *.json
 data/

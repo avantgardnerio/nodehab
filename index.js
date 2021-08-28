@@ -3,12 +3,17 @@ const fs = require('fs');
 const express = require('express')
 const bodyParser = require('body-parser')
 const app = express();
-const sqlite3 = require('sqlite3');
-const sqlite = require('sqlite');
-
-require('express-async-errors');
-
-let con;
+const initOptions = {};
+const pgp = require('pg-promise')(initOptions);
+const con = {
+    host: process.env.DB_HOST || '127.0.0.1',
+    port: process.env.DB_PORT || 5432,
+    database: process.env.DB_NAME || 'postgres',
+    user: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASS,
+    allowExitOnIdle: true,
+};
+const db = pgp(con);
 
 const config = JSON.parse(fs.readFileSync('./data/config.json'));
 const networkKey = Buffer.from(config.networkKey, "hex");
@@ -126,27 +131,20 @@ app.use((error, req, res, next) => {
 
 // https://zwave-js.github.io/node-zwave-js/#/getting-started/quickstart
 (async () => {
-    con = await sqlite.open({filename: './data/db.sqlite', driver: sqlite3.Database});
-    await con.exec(`create table if not exists events (
-        id integer not null constraint events_pk primary key autoincrement,
-        timestamp datetime default current_timestamp,
-        node integer,
-        commandClass integer,
-        endpoint integer,
-        property text,
-        prevValue text,
-        newValue text
-    );`);
     driver.once("driver ready", () => {
         ready = true;
         for(let tuple of driver.controller.nodes) {
             const node = tuple[1];
             node.on('value updated', async (node, args) => {
-                if(!node.ready) return;
-                con.run(`insert into events (node, commandClass, endpoint, property, prevValue, newValue) values (?, ?, ? ,?, ?, ?)`,
-                    node.nodeId, args.commandClass, args.endpoint, args.property, JSON.stringify(args.prevValue), JSON.stringify(args.newValue)
-                );
-                console.log(`value updated node=${node.nodeId} args=${JSON.stringify(args, undefined, 2)}`);
+                try {
+                    console.log(`value updated node=${node.nodeId} args=${JSON.stringify(args, undefined, 2)}`);
+                    if (!node.ready) return;
+                    await db.none('insert into events (node, "commandClass", endpoint, property, "prevValue", "newValue") values ($1, $2, $3, $4, $5, $6)',
+                        [node.nodeId, args.commandClass, args.endpoint, JSON.stringify(args.property), JSON.stringify(args.prevValue), JSON.stringify(args.newValue)]
+                    );
+                } catch(ex) {
+                    console.error('Error handling event!', ex);
+                }
             });
         }
     });
