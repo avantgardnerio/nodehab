@@ -134,7 +134,7 @@ app.use((error, req, res, next) => {
 
 // https://zwave-js.github.io/node-zwave-js/#/getting-started/quickstart
 (async () => {
-    driver.once("driver ready", () => {
+    driver.once("driver ready", async () => {
         ready = true;
 
         // initialize plugins
@@ -143,6 +143,7 @@ app.use((error, req, res, next) => {
                 const Plugin = require(`./plugins/${file}`);
                 const instance = new Plugin(driver, config);
                 plugins.push(instance);
+                await instance.init();
             } catch(ex) {
                 console.error(`Error loading plugin: ${file}`, ex);
             }
@@ -160,7 +161,7 @@ app.use((error, req, res, next) => {
                     );
                     for(let plugin of plugins) {
                         try {
-                            plugin.valueUpdated(node, args);
+                            await plugin.valueUpdated(node, args);
                         } catch(ex) {
                             console.error(`Error notifying plugin ${plugin}`, ex);
                         }
