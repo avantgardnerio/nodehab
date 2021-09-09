@@ -72,6 +72,24 @@ Set environment variables needed by `database.json` or use a `.env` file.
 }
 ```
 
+## example plugin
+Add a file to `./plugins/`:
+
+```javascript
+module.exports = class KegHeater {
+    constructor(driver, config) {
+        this.driver = driver;
+        this.config = config;
+    }
+
+    valueUpdated(node, args) {
+        console.log(`kegheat ${node} ${args}`);
+        // TODO: invoke a driver action here based on config
+    }
+}
+
+```
+
 ## creating migrations
 
 ```sh

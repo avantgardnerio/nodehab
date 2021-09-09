@@ -21,6 +21,9 @@ const options = {
     networkKey,
 };
 
+const plugins = [];
+const files = fs.readdirSync('plugins');
+
 let ready = false;
 const driver = new Driver(config.controllerAddress, options);
 driver.on("error", (e) => {
@@ -133,6 +136,19 @@ app.use((error, req, res, next) => {
 (async () => {
     driver.once("driver ready", () => {
         ready = true;
+
+        // initialize plugins
+        for(let file of files) {
+            try {
+                const Plugin = require(`./plugins/${file}`);
+                const instance = new Plugin(driver, config);
+                plugins.push(instance);
+            } catch(ex) {
+                console.error(`Error loading plugin: ${file}`, ex);
+            }
+        }
+
+        // subscribe to notifications
         for(let tuple of driver.controller.nodes) {
             const node = tuple[1];
             node.on('value updated', async (node, args) => {
@@ -142,6 +158,13 @@ app.use((error, req, res, next) => {
                     await db.none('insert into events (node, "commandClass", endpoint, property, "prevValue", "newValue") values ($1, $2, $3, $4, $5, $6)',
                         [node.nodeId, args.commandClass, args.endpoint, JSON.stringify(args.property), JSON.stringify(args.prevValue), JSON.stringify(args.newValue)]
                     );
+                    for(let plugin of plugins) {
+                        try {
+                            plugin.valueUpdated(node, args);
+                        } catch(ex) {
+                            console.error(`Error notifying plugin ${plugin}`, ex);
+                        }
+                    }
                 } catch(ex) {
                     console.error('Error handling event!', ex);
                 }
