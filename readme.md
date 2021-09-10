@@ -128,3 +128,22 @@ npm run db-migrate -- create <my-name> --sql-file
 ```sh
 npm run db-migrate -- up
 ```
+                                              
+## example reports
+
+```sql
+select slots.slot, ground.temp as ground, main.temp as main, master.temp as master
+from ( select to_timestamp(floor((extract('epoch' from timestamp) / 600)) * 600) AT TIME ZONE 'UTC' as slot
+         from events where node in (4, 13, 21) and property = '"Air temperature"' group by slot ) slots
+left join ( select to_timestamp(floor((extract('epoch' from timestamp) / 600)) * 600) AT TIME ZONE 'UTC' as slot, avg("newValue"::float) as temp
+        from events where node=21 and property = '"Air temperature"' group by slot ) ground on ground.slot = slots.slot
+left join ( select to_timestamp(floor((extract('epoch' from timestamp) / 600)) * 600) AT TIME ZONE 'UTC' as slot, avg("newValue"::float) as temp
+        from events where node=13 and property = '"Air temperature"' group by slot ) main on main.slot = slots.slot
+left join ( select to_timestamp(floor((extract('epoch' from timestamp) / 600)) * 600) AT TIME ZONE 'UTC' as slot, avg("newValue"::float) as temp
+        from events where node=4 and property = '"Air temperature"' group by slot ) master on master.slot = slots.slot
+order by slots.slot;
+```
+
+Yields:
+
+![temperatures](./doc/img/temps.png)
