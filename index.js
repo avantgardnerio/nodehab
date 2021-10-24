@@ -89,6 +89,15 @@ app.get('/api/nodes/:id/failed', async (req, res) => {
     res.send(JSON.stringify(isFailed, null, 3));
 });
 
+app.get('/api/nodes/:id/refresh', async (req, res) => {
+    console.log(`Refreshing node ${req.params.id}...`);
+    const node = driver.controller.nodes.get(parseInt(req.params.id));
+    await node.refreshValues();
+    console.log(`Node ${req.params.id} refreshed!`);
+    res.header("Content-Type",'application/json');
+    res.send(JSON.stringify(true, null, 3));
+});
+
 app.post('/api/nodes/:id/remove', async (req, res) => {
     const nodeId = parseInt(req.params.id);
     console.log(`Removing node ${req.params.id}...`);

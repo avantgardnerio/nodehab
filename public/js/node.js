@@ -2,6 +2,7 @@ export default {
     template: `
       <div>
       <v-btn v-on:click="failedClick">{{failedMsg}}</v-btn>
+      <v-btn v-on:click="refreshClick">{{refreshMsg}}</v-btn>
       <v-data-table :headers="headers" :items="values" :items-per-page="15">
         <template v-slot:item.val="props">
           <v-edit-dialog :return-value.sync="props.item.val" @save="save" @cancel="cancel" @open="open" @close="close" >
@@ -29,6 +30,7 @@ export default {
             snackColor: '',
             snackText: '',
             failedMsg: 'Has node failed?',
+            refreshMsg: 'Refresh node...',
             headers: [
                 { text: 'Command Class', align: 'left', value: 'commandClassName', class: 'tableheader'},
                 { text: 'Property', align: 'left', value: 'prop', class: 'tableheader'},
@@ -91,6 +93,15 @@ export default {
             if(this.failedMsg.toLowerCase().includes('remove')) {
                 await fetch(`/api/nodes/${this.$route.params.id}/remove`, {method: 'POST'});
                 this.$router.push(`/controller`);
+            }
+        },
+        async refreshClick() {
+            if(this.refreshMsg.includes('...')) {
+                this.refreshMsg = 'Refreshing node';
+                const resp = await fetch(`/api/nodes/${this.$route.params.id}/refresh`);
+                const refreshed = await resp.json();
+                this.refreshMsg = refreshed ? 'Node refreshed' : 'Refresh failed';
+                return;
             }
         }
     },
