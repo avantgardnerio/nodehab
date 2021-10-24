@@ -3,6 +3,7 @@ export default {
       <div>
       <v-btn v-on:click="beginInclude">Include a node...</v-btn>
       <v-btn v-on:click="beginExclude">Exclude a node...</v-btn>
+      <v-btn v-on:click="beginHeal">Begin healing network...</v-btn>
       <v-data-table :headers="headers" :items="nodes" @click:row="handleClick" :items-per-page="20">
         <template slot="items" slot-scope="props">
           <tr>
@@ -40,6 +41,12 @@ export default {
         handleClick(row) {
             console.log(row.id);
             this.$router.push(`/nodes/${row.id}`);
+        },
+        async beginHeal() {
+            const result = await fetch(`/nodes/heal`, {
+                method: 'POST'
+            });
+            console.log(`beginHeal()=${result}`);
         },
         async beginExclude() {
             const result = await fetch(`/nodes/exclude`, {

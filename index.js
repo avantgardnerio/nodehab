@@ -52,6 +52,13 @@ app.get('/api/nodes', async (req, res) => {
     res.send(JSON.stringify(nodes, null, 3));
 });
 
+app.post('/nodes/heal', async (req, res) => {
+    const result = await driver.controller.beginHealingNetwork();
+    res.header("Content-Type",'application/json');
+    console.log(`Healing: `, result);
+    res.send(JSON.stringify(result, null, 3));
+});
+
 app.post('/nodes/exclude', async (req, res) => {
     const result = await driver.controller.beginExclusion();
     res.header("Content-Type",'application/json');
@@ -89,17 +96,65 @@ app.get('/api/nodes/:id/failed', async (req, res) => {
     res.send(JSON.stringify(isFailed, null, 3));
 });
 
-app.get('/api/nodes/:id/refresh', async (req, res) => {
-    console.log(`Refreshing node ${req.params.id}...`);
+app.get('/api/nodes/:id/refreshValues', async (req, res) => {
+    console.log(`Refreshing values ${req.params.id}...`);
     const node = driver.controller.nodes.get(parseInt(req.params.id));
     await node.refreshValues();
-    console.log(`Node ${req.params.id} refreshed!`);
+    console.log(`Values for ${req.params.id} refreshed!`);
     res.header("Content-Type",'application/json');
     res.send(JSON.stringify(true, null, 3));
 });
 
+app.get('/api/nodes/:id/refreshInfo', async (req, res) => {
+    console.log(`Refreshing info ${req.params.id}...`);
+    const node = driver.controller.nodes.get(parseInt(req.params.id));
+    await node.refreshInfo();
+    console.log(`Info for ${req.params.id} refreshed!`);
+    res.header("Content-Type",'application/json');
+    res.send(JSON.stringify(true, null, 3));
+});
+
+app.get('/api/nodes/:id/ping', async (req, res) => {
+    console.log(`Pinging node ${req.params.id}...`);
+    const node = driver.controller.nodes.get(parseInt(req.params.id));
+    //await node.refreshInfo();
+    const result = await node.ping();
+    console.log(`Node ${req.params.id} pinged=${result}!`);
+    res.header("Content-Type",'application/json');
+    res.send(JSON.stringify(result, null, 3));
+});
+
+app.get('/api/nodes/:id/heal', async (req, res) => {
+    console.log(`Healing node ${req.params.id}...`);
+    const result = await driver.controller.healNode(parseInt(req.params.id));
+    console.log(`Node ${req.params.id} heal=${result}!`);
+    res.header("Content-Type",'application/json');
+    res.send(JSON.stringify(result, null, 3));
+});
+
+app.put('/api/nodes/:id/values', async (req, res) => {
+    try {
+        const row = req.body;
+        const val = {
+            commandClass: row.commandClass,
+            endpoint: row.endpoint,
+            property: row.property,
+            propertyKey: row.propertyKey,
+        };
+        console.log(`Polling node ${req.params.id} value ${JSON.stringify(val, null, 3)}...`);
+        const node = driver.controller.nodes.get(parseInt(req.params.id));
+        const result = await node.pollValue(val);
+        console.log(`Node ${req.params.id} poll result=${result}!`);
+        res.header("Content-Type", 'application/json');
+        res.send(JSON.stringify(result, null, 3));
+    } catch(ex) {
+        console.error(ex);
+        res.status(ex.status || 500).send({error: ex.message})
+    }
+});
+                                                                                                                        
 app.post('/api/nodes/:id/remove', async (req, res) => {
-    const nodeId = parseInt(req.params.id);
+    const nodeId = parseInt(req.params.id);                              
     console.log(`Removing node ${req.params.id}...`);
     const result = await driver.controller.removeFailedNode(nodeId);
     res.header("Content-Type",'application/json');

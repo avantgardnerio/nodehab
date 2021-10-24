@@ -2,11 +2,14 @@ export default {
     template: `
       <div>
       <v-btn v-on:click="failedClick">{{failedMsg}}</v-btn>
-      <v-btn v-on:click="refreshClick">{{refreshMsg}}</v-btn>
-      <v-data-table :headers="headers" :items="values" :items-per-page="15">
+      <v-btn v-on:click="refreshValuesClick">{{refreshValuesMsg}}</v-btn>
+      <v-btn v-on:click="refreshInfoClick">{{refreshInfoMsg}}</v-btn>
+      <v-btn v-on:click="healClick">{{healMsg}}</v-btn>
+      <v-btn v-on:click="pingClick">{{pingMsg}}</v-btn>
+      <v-data-table :headers="headers" :items="values" :items-per-page="50">
         <template v-slot:item.val="props">
           <v-edit-dialog :return-value.sync="props.item.val" @save="save" @cancel="cancel" @open="open" @close="close" >
-            {{ props.item.val }}
+            &nbsp; {{ props.item.val }} <v-btn v-on:click="(e) => getValue(e, props.item)">&#10227;</v-btn>
             <template v-slot:input>
               <v-text-field v-model="props.item.val" label="Edit" single-line counter
                             @keyup.enter="onUpdateCourse(props.item)"
@@ -30,7 +33,10 @@ export default {
             snackColor: '',
             snackText: '',
             failedMsg: 'Has node failed?',
-            refreshMsg: 'Refresh node...',
+            refreshValuesMsg: 'Refresh values',
+            refreshInfoMsg: 'Refresh info',
+            healMsg: 'Heal',
+            pingMsg: 'Ping',
             headers: [
                 { text: 'Command Class', align: 'left', value: 'commandClassName', class: 'tableheader'},
                 { text: 'Property', align: 'left', value: 'prop', class: 'tableheader'},
@@ -64,6 +70,14 @@ export default {
                 body: JSON.stringify(row),
             });
         },
+        async getValue(e, row) {
+            e.stopPropagation();
+            await fetch(`/api/nodes/${this.$route.params.id}/values`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(row),
+            });
+        },
         save() {
             this.snack = true
             this.snackColor = 'success'
@@ -88,20 +102,47 @@ export default {
                 const resp = await fetch(`/api/nodes/${this.$route.params.id}/failed`);
                 const isFailed = await resp.json();
                 this.failedMsg = isFailed ? 'Remove failed node' : 'Node is healthy';
-                return;
+                return;                                                                                 
             }
             if(this.failedMsg.toLowerCase().includes('remove')) {
                 await fetch(`/api/nodes/${this.$route.params.id}/remove`, {method: 'POST'});
                 this.$router.push(`/controller`);
             }
         },
-        async refreshClick() {
-            if(this.refreshMsg.includes('...')) {
-                this.refreshMsg = 'Refreshing node';
-                const resp = await fetch(`/api/nodes/${this.$route.params.id}/refresh`);
-                const refreshed = await resp.json();
-                this.refreshMsg = refreshed ? 'Node refreshed' : 'Refresh failed';
-                return;
+        async refreshValuesClick() {     
+            const inProgressMsg = 'Refreshing values...';
+            if(this.refreshValuesMsg !== inProgressMsg) {
+                this.refreshValuesMsg = inProgressMsg;
+                const resp = await fetch(`/api/nodes/${this.$route.params.id}/refreshValues`);
+                const res = await resp.json();
+                this.refreshValuesMsg = res ? 'Values refreshed' : 'Refresh values failed';
+            }
+        },
+        async refreshInfoClick() {
+            const inProgressMsg = 'Refreshing info...';
+            if(this.refreshValuesMsg !== inProgressMsg) {
+                this.refreshValuesMsg = inProgressMsg;
+                const resp = await fetch(`/api/nodes/${this.$route.params.id}/refreshInfo`);
+                const res = await resp.json();
+                this.refreshValuesMsg = res ? 'Info refreshed' : 'Refresh info failed';
+            }
+        },
+        async pingClick() {
+            const inProgressMsg = 'Pinging...';
+            if(this.pingMsg !== inProgressMsg) {
+                this.pingMsg = inProgressMsg;
+                const resp = await fetch(`/api/nodes/${this.$route.params.id}/ping`);
+                const res = await resp.json();
+                this.pingMsg = res ? 'Pong' : 'Ping failed';
+            }
+        },
+        async healClick() {
+            const inProgressMsg = 'Healing...';
+            if(this.healMsg !== inProgressMsg) {
+                this.healMsg = inProgressMsg;
+                const resp = await fetch(`/api/nodes/${this.$route.params.id}/heal`);
+                const res = await resp.json();
+                this.healMsg = res ? 'Node healed' : 'Heal failed';
             }
         }
     },
