@@ -1,6 +1,7 @@
 export default {
     template: `
       <div>
+      <v-btn v-on:click="subscribe">Subscribe!</v-btn>
       <v-data-table :headers="headers" :items="values" :items-per-page="20">
         <template v-slot:item.current="{ item }">
           <v-switch v-if="item.type === 'switch'" v-model="item.current" disabled
@@ -41,6 +42,14 @@ export default {
             const resp = await fetch(`/api/dashboard`);
             this.values = await resp.json();
             this.loading = false;
+        },
+        async subscribe() {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    console.log("The user accepted!");
+                    const notification = new Notification("Hello World!");
+                }
+            });
         },
         async onChange(item) {
             if(item.type === 'int') {

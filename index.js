@@ -1,4 +1,5 @@
 const { Driver } = require("zwave-js");
+const webPush = require("web-push");
 const fs = require('fs');
 const express = require('express')
 const bodyParser = require('body-parser')
@@ -21,6 +22,14 @@ const options = {
     networkKey,
 };
 
+if(!config.vapidKeys) {
+    const vapidKeys = webPush.generateVAPIDKeys();
+    console.log(JSON.stringify(vapidKeys, null, 3));
+    process.exit(-1);
+} else {
+    webPush.setVapidDetails(config.url, config.vapidKeys.publicKey, config.vapidKeys.privateKey);
+}
+
 const plugins = [];
 const files = fs.readdirSync('plugins');
 
@@ -32,7 +41,21 @@ driver.on("error", (e) => {
 
 app.use(bodyParser());
 app.use(express.static('node_modules'))
-app.use(express.static('public'))
+app.use(express.static('public'));
+
+app.get('/api/vapid/publicKey', (req, res) => {
+    res.header("Content-Type",'application/json');
+    res.send(JSON.stringify(config.vapidKeys.publicKey, null, 3));
+});
+
+app.post('/api/push/register', async (req, res) => {
+    console.log(JSON.stringify(req.body, null, 3))
+    await db.none('insert into subscriptions (subscription) values ($1)',
+        [JSON.stringify(req.body)]
+    );
+    res.header("Content-Type",'application/json');
+    res.send(JSON.stringify(true, null, 3));
+})
 
 app.get('/api/nodes', async (req, res) => {
     const nodes = [];
@@ -67,7 +90,7 @@ app.post('/nodes/exclude', async (req, res) => {
 });
 
 app.post('/nodes/include', async (req, res) => {
-    const result = await driver.controller.beginInclusion(true);
+    const result = await driver.controller.beginInclusion(false);
     res.header("Content-Type",'application/json');
     console.log(`Including: `, result);
     res.send(JSON.stringify(result, null, 3));
@@ -139,7 +162,6 @@ app.put('/api/nodes/:id/values', async (req, res) => {
             commandClass: row.commandClass,
             endpoint: row.endpoint,
             property: row.property,
-            propertyKey: row.propertyKey,
         };
         console.log(`Polling node ${req.params.id} value ${JSON.stringify(val, null, 3)}...`);
         const node = driver.controller.nodes.get(parseInt(req.params.id));
@@ -176,20 +198,33 @@ app.put('/api/nodes/:id', async (req, res) => {
 });
 
 app.get('/api/dashboard', async (req, res) => {
-    const dashboard = config.dashboard.map(it => ({...it}));
-    for(let obj of dashboard) {
-        if(obj.driver === 'zwave') {
-            const node = driver.controller.nodes.get(obj.node);
-            if(obj.read) {
-                obj.current = await node.getValue({commandClass: obj.commandClass, endpoint: obj.endpoint, property: obj.read});
-            }
-            if(obj.write) {
-                obj.target = await node.getValue({commandClass: obj.commandClass, endpoint: obj.endpoint, property: obj.write});
+    try {
+        const dashboard = config.dashboard.map(it => ({...it}));
+        for (let obj of dashboard) {
+            if (obj.driver === 'zwave') {
+                const node = driver.controller.nodes.get(obj.node);
+                if (obj.read) {
+                    obj.current = await node.getValue({
+                        commandClass: obj.commandClass,
+                        endpoint: obj.endpoint,
+                        property: obj.read
+                    });
+                }
+                if (obj.write) {
+                    obj.target = await node.getValue({
+                        commandClass: obj.commandClass,
+                        endpoint: obj.endpoint,
+                        property: obj.write
+                    });
+                }
             }
         }
+        res.header("Content-Type", 'application/json');
+        res.send(JSON.stringify(dashboard));
+    } catch(ex) {
+        console.error('/api/dashboard', ex);
+        return res.status(500).json({ error: ex.toString() });
     }
-    res.header("Content-Type",'application/json');
-    res.send(JSON.stringify(dashboard));
 });
 
 app.use((error, req, res, next) => {
@@ -216,6 +251,8 @@ app.use((error, req, res, next) => {
         // subscribe to notifications
         for(let tuple of driver.controller.nodes) {
             const node = tuple[1];
+            const endpoints = node.getEndpointIndizes();
+            console.log(`Node ${node.nodeId} endpoints=${JSON.stringify(endpoints)}`);
             node.on('value updated', async (node, args) => {
                 try {
                     console.log(`value updated node=${node.nodeId} args=${JSON.stringify(args, undefined, 2)}`);

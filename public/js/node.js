@@ -6,7 +6,7 @@ export default {
       <v-btn v-on:click="refreshInfoClick">{{refreshInfoMsg}}</v-btn>
       <v-btn v-on:click="healClick">{{healMsg}}</v-btn>
       <v-btn v-on:click="pingClick">{{pingMsg}}</v-btn>
-      <v-data-table :headers="headers" :items="values" :items-per-page="50">
+      <v-data-table :headers="headers" :items="values" :items-per-page="100">
         <template v-slot:item.val="props">
           <v-edit-dialog :return-value.sync="props.item.val" @save="save" @cancel="cancel" @open="open" @close="close" >
             &nbsp; {{ props.item.val }} <v-btn v-on:click="(e) => getValue(e, props.item)">&#10227;</v-btn>
