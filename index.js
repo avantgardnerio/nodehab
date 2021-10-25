@@ -97,18 +97,23 @@ app.post('/nodes/include', async (req, res) => {
 });
 
 app.get('/api/nodes/:id', async (req, res) => {
-    const node = driver.controller.nodes.get(parseInt(req.params.id));
-    const values = node.getDefinedValueIDs().map(it => {
-        try {
-            const val = node.getValue(it);
-            return {...it, val};
-        } catch (ex) {
-            return {...it};
-        }
-    });
+    try {
+        const node = driver.controller.nodes.get(parseInt(req.params.id));
+        const values = node.getDefinedValueIDs().map(it => {
+            try {
+                const val = node.getValue(it);
+                return {...it, val};
+            } catch (ex) {
+                return {...it};
+            }
+        });
 
-    res.header("Content-Type",'application/json');
-    res.send(JSON.stringify(values, null, 3));
+        res.header("Content-Type", 'application/json');
+        res.send(JSON.stringify(values, null, 3));
+    } catch(ex) {
+        console.error('Error in /api/nodes/:id', ex);
+        res.status(ex.status || 500).send({error: ex.message})
+    }
 });
 
 app.get('/api/nodes/:id/failed', async (req, res) => {
@@ -170,7 +175,7 @@ app.put('/api/nodes/:id/values', async (req, res) => {
         res.header("Content-Type", 'application/json');
         res.send(JSON.stringify(result, null, 3));
     } catch(ex) {
-        console.error(ex);
+        console.error('Error in /api/nodes/:id/values', ex);
         res.status(ex.status || 500).send({error: ex.message})
     }
 });
