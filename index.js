@@ -181,25 +181,35 @@ app.put('/api/nodes/:id/values', async (req, res) => {
 });
                                                                                                                         
 app.post('/api/nodes/:id/remove', async (req, res) => {
-    const nodeId = parseInt(req.params.id);                              
-    console.log(`Removing node ${req.params.id}...`);
-    const result = await driver.controller.removeFailedNode(nodeId);
-    res.header("Content-Type",'application/json');
-    console.log(`Remove node result: `, result);
-    res.send(JSON.stringify(result, null, 3));
+    try {
+        const nodeId = parseInt(req.params.id);
+        console.log(`Removing node ${req.params.id}...`);
+        const result = await driver.controller.removeFailedNode(nodeId);
+        res.header("Content-Type",'application/json');
+        console.log(`Remove node result: `, result);
+        res.send(JSON.stringify(result, null, 3));
+    } catch(ex) {
+        console.error('Error in /api/nodes/:id/remove', ex);
+        res.status(ex.status || 500).send({error: ex.message})
+    }
 });
 
 app.put('/api/nodes/:id', async (req, res) => {
-    const node = driver.controller.nodes.get(parseInt(req.params.id));
-    const row = req.body;
-    console.log(`${new Date()} setting ${row.commandClass} ${row.prop} to ${row.val}`);
-    await node.setValue({
-        commandClass: row.commandClass,
-        endpoint: row.endpoint,
-        property: row.property,
-        propertyKey: row.propertyKey,
-    }, row.val);
-    res.send(JSON.stringify(true));
+    try {
+        const node = driver.controller.nodes.get(parseInt(req.params.id));
+        const row = req.body;
+        console.log(`${new Date()} setting ${row.commandClass} ${row.prop} to ${row.val}`);
+        await node.setValue({
+            commandClass: row.commandClass,
+            endpoint: row.endpoint,
+            property: row.property,
+            propertyKey: row.propertyKey,
+        }, row.val);
+        res.send(JSON.stringify(true));
+    } catch(ex) {
+        console.error('Error in PUT /api/nodes/:id', ex);
+        res.status(ex.status || 500).send({error: ex.message})
+    }
 });
 
 app.get('/api/dashboard', async (req, res) => {
@@ -245,7 +255,7 @@ app.use((error, req, res, next) => {
         for(let file of files) {
             try {
                 const Plugin = require(`./plugins/${file}`);
-                const instance = new Plugin(driver, config);
+                const instance = new Plugin(driver, config, webPush, db);
                 plugins.push(instance);
                 await instance.init();
             } catch(ex) {
@@ -258,7 +268,7 @@ app.use((error, req, res, next) => {
             const node = tuple[1];
             const endpoints = node.getEndpointIndizes();
             console.log(`Node ${node.nodeId} endpoints=${JSON.stringify(endpoints)}`);
-            node.on('value updated', async (node, args) => {
+            node.on('value updated', async (_node, args) => {
                 try {
                     console.log(`value updated node=${node.nodeId} args=${JSON.stringify(args, undefined, 2)}`);
 
@@ -266,16 +276,6 @@ app.use((error, req, res, next) => {
                     await db.none('insert into events (node, "commandClass", endpoint, property, "prevValue", "newValue") values ($1, $2, $3, $4, $5, $6)',
                         [node.nodeId, args.commandClass, args.endpoint, JSON.stringify(args.property), JSON.stringify(args.prevValue), JSON.stringify(args.newValue)]
                     );
-
-                    // notify subscribers
-                    const subscriptions = await db.many('select * from subscriptions');
-                    for(let subscription of subscriptions) {
-                        try {
-                            await webPush.sendNotification(subscription.subscription, JSON.stringify(args));
-                        } catch(ex) {
-                            console.error(`Error pushing notification!`, ex);
-                        }
-                    }
 
                     // forward to plugins
                     for(let plugin of plugins) {
