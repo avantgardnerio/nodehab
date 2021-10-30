@@ -50,7 +50,7 @@ app.get('/api/vapid/publicKey', (req, res) => {
 
 app.post('/api/push/register', async (req, res) => {
     console.log(JSON.stringify(req.body, null, 3))
-    await db.none('insert into subscriptions (subscription) values ($1)',
+    await db.none('insert into subscriptions (subscription) values ($1) on conflict do nothing;',
         [JSON.stringify(req.body)]
     );
     res.header("Content-Type",'application/json');
@@ -261,10 +261,23 @@ app.use((error, req, res, next) => {
             node.on('value updated', async (node, args) => {
                 try {
                     console.log(`value updated node=${node.nodeId} args=${JSON.stringify(args, undefined, 2)}`);
-                    if (!node.ready) return;
+
+                    // log
                     await db.none('insert into events (node, "commandClass", endpoint, property, "prevValue", "newValue") values ($1, $2, $3, $4, $5, $6)',
                         [node.nodeId, args.commandClass, args.endpoint, JSON.stringify(args.property), JSON.stringify(args.prevValue), JSON.stringify(args.newValue)]
                     );
+
+                    // notify subscribers
+                    const subscriptions = await db.many('select * from subscriptions');
+                    for(let subscription of subscriptions) {
+                        try {
+                            await webPush.sendNotification(subscription.subscription, JSON.stringify(args));
+                        } catch(ex) {
+                            console.error(`Error pushing notification!`, ex);
+                        }
+                    }
+
+                    // forward to plugins
                     for(let plugin of plugins) {
                         try {
                             await plugin.valueUpdated(node, args);

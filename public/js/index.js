@@ -42,12 +42,17 @@ if ('serviceWorker' in navigator) {
                     userVisibleOnly: true,
                     applicationServerKey: convertedVapidKey
                 });
+                console.log('Subscribed');
+            } else {
+                console.log('Already subscribed');
             }
+            await registration.update();
             await fetch('/api/push/register', {
                 method: 'post',
                 headers: { 'Content-type': 'application/json' },
                 body: JSON.stringify( subscription, null, 3),
             });
+            console.log('Registered');
         } catch(err) {
             // registration failed :(
             console.log('ServiceWorker registration failed: ', err);

@@ -2,11 +2,10 @@ self.addEventListener('install', function(event) {
     console.log('Installed service worker!');
 });
 
-self.addEventListener('push', function(event) {
-    console.log(event);
+self.addEventListener('push', async function(event) {
     event.waitUntil(
-        self.registration.showNotification('ServiceWorker Cookbook', {
-            body: 'Alea iacta est',
+        self.registration.showNotification('NodeHab', {
+            body: await event.data.text(),
         })
     )
 })
