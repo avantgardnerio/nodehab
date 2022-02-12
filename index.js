@@ -49,7 +49,7 @@ app.get('/api/vapid/publicKey', (req, res) => {
 });
 
 app.post('/api/push/register', async (req, res) => {
-    console.log(`Register ${JSON.stringify(req.body, null, 3)}`);
+    // console.log(`Register ${JSON.stringify(req.body, null, 3)}`);
     await db.none('insert into subscriptions (subscription) values ($1) on conflict do nothing;',
         [JSON.stringify(req.body)]
     );
