@@ -24,7 +24,7 @@ const options = {
 
 if(!config.vapidKeys) {
     const vapidKeys = webPush.generateVAPIDKeys();
-    console.log(JSON.stringify(vapidKeys, null, 3));
+    console.log(`Vapid keys: ${JSON.stringify(vapidKeys, null, 3)}`);
     process.exit(-1);
 } else {
     webPush.setVapidDetails(config.url, config.vapidKeys.publicKey, config.vapidKeys.privateKey);
@@ -49,7 +49,7 @@ app.get('/api/vapid/publicKey', (req, res) => {
 });
 
 app.post('/api/push/register', async (req, res) => {
-    console.log(JSON.stringify(req.body, null, 3))
+    console.log(`Register ${JSON.stringify(req.body, null, 3)}`);
     await db.none('insert into subscriptions (subscription) values ($1) on conflict do nothing;',
         [JSON.stringify(req.body)]
     );
@@ -219,7 +219,7 @@ app.get('/api/dashboard', async (req, res) => {
             if (obj.driver === 'zwave') {
                 const node = driver.controller.nodes.get(obj.node);
                 if(!node) {
-                    console.warn(`Node not found: ${obj.node.id}`);
+                    console.warn(`Node not found: ${obj.node}`);
                     continue;
                 }
                 if (obj.read) {
