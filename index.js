@@ -218,6 +218,10 @@ app.get('/api/dashboard', async (req, res) => {
         for (let obj of dashboard) {
             if (obj.driver === 'zwave') {
                 const node = driver.controller.nodes.get(obj.node);
+                if(!node) {
+                    console.warn(`Node not found: ${obj.node}`);
+                    continue;
+                }
                 if (obj.read) {
                     obj.current = await node.getValue({
                         commandClass: obj.commandClass,
