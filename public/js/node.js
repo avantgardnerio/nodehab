@@ -58,10 +58,12 @@ export default {
             this.loading = false;
         },
         async onUpdateCourse(row) {
-            if(typeof row.orig === 'boolean') {
-                row.val = row.val === true || row.val === 'true';
-            } else if(typeof row.orig === 'number') {
-                row.val = parseFloat(row.val);
+            const val = row.val.trim().toLowerCase();
+            if([`true`, `false`].includes(val)) {
+                row.val = val === `true`;
+            }
+            if(!isNaN(val) && !isNaN(parseFloat(val))) {
+                row.val = parseFloat(val);
             }
             console.log(`${new Date()} setting ${row.commandClass} ${row.prop} to ${row.val}`);
             await fetch(`/api/nodes/${this.$route.params.id}`, {
