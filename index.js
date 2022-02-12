@@ -219,7 +219,7 @@ app.get('/api/dashboard', async (req, res) => {
             if (obj.driver === 'zwave') {
                 const node = driver.controller.nodes.get(obj.node);
                 if(!node) {
-                    console.warn(`Node not found: ${obj.node}`);
+                    console.warn(`Node not found: ${obj.node.id}`);
                     continue;
                 }
                 if (obj.read) {
@@ -274,7 +274,7 @@ app.use((error, req, res, next) => {
             console.log(`Node ${node.nodeId} endpoints=${JSON.stringify(endpoints)}`);
             node.on('value updated', async (_node, args) => {
                 try {
-                    console.log(`value updated node=${node.nodeId} args=${JSON.stringify(args, undefined, 2)}`);
+                    console.log(`value updated node=${node.nodeId} args=${JSON.stringify(args)}`);
 
                     // log
                     await db.none('insert into events (node, "commandClass", endpoint, property, "prevValue", "newValue") values ($1, $2, $3, $4, $5, $6)',
@@ -283,6 +283,7 @@ app.use((error, req, res, next) => {
 
                     // forward to plugins
                     for(let plugin of plugins) {
+                        // console.log(`Plugin updated: `, plugin.constructor.name)
                         try {
                             await plugin.valueUpdated(node, args);
                         } catch(ex) {
