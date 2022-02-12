@@ -250,6 +250,22 @@ app.use((error, req, res, next) => {
     return res.status(500).json({ error: error.toString() });
 });
 
+const notify = async (msg) => {
+    const subscriptions = await db.many('select * from subscriptions');
+    for(let subscription of subscriptions) {
+        try {
+            console.log(`Notifying subscription ${subscription.id} ${msg}`);
+            await webPush.sendNotification(subscription.subscription, msg);
+        } catch(ex) {
+            console.error(`Error pushing notification: ${ex.statusCode}`, ex);
+            if(ex.statusCode >= 400 && ex.statusCode < 500) {
+                console.warn(`Removing dead subscription ${subscription.id}...`);
+                await db.none(`delete from subscriptions where id=$1`, [subscription.id]);
+            }
+        }
+    }
+};
+
 // https://zwave-js.github.io/node-zwave-js/#/getting-started/quickstart
 (async () => {
     driver.once("driver ready", async () => {
@@ -259,7 +275,7 @@ app.use((error, req, res, next) => {
         for(let file of files) {
             try {
                 const Plugin = require(`./plugins/${file}`);
-                const instance = new Plugin(driver, config, webPush, db);
+                const instance = new Plugin(driver, config, notify, db);
                 plugins.push(instance);
                 await instance.init();
             } catch(ex) {
