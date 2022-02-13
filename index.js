@@ -274,10 +274,9 @@ const notify = async (msg) => {
         // initialize plugins
         for(let file of files) {
             try {
-                const Plugin = require(`./plugins/${file}`);
-                const instance = new Plugin(driver, config, notify, db);
+                const plugin = require(`./plugins/${file}`);
+                const instance = await plugin(driver, config, notify, db);
                 plugins.push(instance);
-                await instance.init();
             } catch(ex) {
                 console.error(`Error loading plugin: ${file}`, ex);
             }
