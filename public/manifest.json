@@ -1,0 +1,15 @@
+{
+    "background_color": "purple",
+    "description": "Koldenhome",
+    "display": "fullscreen",
+    "icons": [
+      {
+        "src": "img/house-xxl.png",
+        "sizes": "256x256",
+        "type": "image/png"
+      }
+    ],
+    "name": "Koldenhome",
+    "short_name": "Koldenhome",
+    "start_url": "/#/dashboard"
+  }

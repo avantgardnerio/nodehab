@@ -1,7 +1,10 @@
+
+let deferredPrompt;
 export default {
     template: `
       <div>
       <v-btn v-on:click="subscribe">Subscribe!</v-btn>
+      <v-btn v-on:click="install" v-if="canAdd">Install!</v-btn>
       <v-data-table :headers="headers" :items="values" :items-per-page="20">
         <template v-slot:item.current="{ item }">
           <v-switch v-if="item.type === 'switch'" v-model="item.current" disabled
@@ -21,6 +24,7 @@ export default {
     `,
     data() {
         return {
+            canAdd: false,
             loading: false,
             snack: false,
             snackColor: '',
@@ -35,6 +39,11 @@ export default {
     },
     created() {
         this.getDataFromApi()
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            this.canAdd = true;
+          });
     },
     methods: {
         async getDataFromApi() {
@@ -49,6 +58,18 @@ export default {
                     console.log("The user accepted!");
                     const notification = new Notification("Hello World!");
                 }
+            });
+        },
+        async install() {
+            this.canAdd = false;
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                console.log('User accepted the A2HS prompt');
+                } else {
+                console.log('User dismissed the A2HS prompt');
+                }
+                deferredPrompt = null;
             });
         },
         async onChange(item) {
