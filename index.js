@@ -272,11 +272,14 @@ const notify = async (msg) => {
         ready = true;
 
         // initialize plugins
-        for(let file of files) {
+        for(let file of Object.keys(config.plugins)) {
+            const instances = config.plugins[file];
             try {
                 const plugin = require(`./plugins/${file}`);
-                const instance = await plugin(driver, config, notify, db);
-                plugins.push(instance);
+                for(const opts of instances) {
+                    const instance = await plugin(driver, config, notify, db, opts);
+                    plugins.push(instance);
+                }
             } catch(ex) {
                 console.error(`Error loading plugin: ${file}`, ex);
             }
