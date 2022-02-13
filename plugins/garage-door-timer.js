@@ -1,13 +1,11 @@
-const notifyThreshold = 5 * 60;
 const commandClass = 102;
-const doorName = 'Garage door';
 const property = `currentState`;
 
-module.exports = async (driver, config, notify) => {
+module.exports = async (driver, config, notify, db, opts) => {
     let timeout;
     let currentState;
 
-    const deviceId = parseInt(Object.keys(config.nodes).find(k => config.nodes[k] === doorName));
+    const deviceId = parseInt(Object.keys(config.nodes).find(k => config.nodes[k] === opts.doorName));
     const device = driver.controller.nodes.get(deviceId);
     console.log(`garageDoorId=${deviceId}`);
 
@@ -21,8 +19,8 @@ module.exports = async (driver, config, notify) => {
             return; // Don't care
         }
         timeout = setTimeout(async () => {
-            await notify(`${doorName} has been open for ${notifyThreshold} seconds`);
-        }, notifyThreshold * 1000);
+            await notify(`${opts.doorName} has been open for ${opts.notifyThreshold} seconds`);
+        }, opts.notifyThreshold * 1000);
     }
     await update(await device.getValue({ commandClass, property }));
 
