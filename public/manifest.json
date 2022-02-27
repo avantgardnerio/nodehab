@@ -1,7 +1,7 @@
 {
     "background_color": "purple",
     "description": "Koldenhome",
-    "display": "fullscreen",
+    "display": "Standalone",
     "icons": [
       {
         "src": "img/house-xxl.png",
