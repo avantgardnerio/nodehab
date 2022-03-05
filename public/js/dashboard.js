@@ -7,15 +7,13 @@ export default {
       <v-btn v-on:click="install" v-if="canAdd">Install!</v-btn>
       <v-data-table :headers="headers" :items="values" :items-per-page="20">
         <template v-slot:item.current="{ item }">
-          <v-switch v-if="item.type === 'switch'" v-model="item.current" disabled
+          <v-switch v-if="item.type === 'switch'" v-model="item.current" :disabled="item.write === undefined" @change="onChange(item, 'current')"
                     :true-value="item.trueValue" :false-value="item.falseValue"></v-switch>
           <v-text-field v-if="item.type === 'int'" v-model="item.current" type="number" label="Number" disabled 
                         ></v-text-field>
           <v-select v-if="item.type === 'radio'" v-model="item.current" :items="item.options" disabled></v-select>
         </template>
         <template v-slot:item.target="{ item }" >
-          <v-switch v-if="item.write !== undefined && item.type === 'switch'" v-model="item.target" @change="onChange(item)"
-                    :true-value="item.trueValue" :false-value="item.falseValue"></v-switch>
           <v-text-field v-if="item.write !== undefined && item.type === 'int'" v-model="item.target" type="number" label="Number" @change="onChange(item)"></v-text-field>
           <v-select v-if="item.type === 'radio'" v-model="item.target" :items="item.options" @change="onChange(item)"></v-select>
         </template>
@@ -72,11 +70,11 @@ export default {
                 deferredPrompt = null;
             });
         },
-        async onChange(item) {
+        async onChange(item, model) {
             if(item.type === 'int') {
-                item.target = parseInt(item.target);
+                item[model] = parseInt(item[model]);
             }
-            const obj = {commandClass: item.commandClass, endpoint: item.endpoint, property: item.write, val: item.target};
+            const obj = {commandClass: item.commandClass, endpoint: item.endpoint, property: item.write, val: item[model]};
             console.log(obj);
             await fetch(`/api/nodes/${item.node}`, {
                 method: 'PUT',
