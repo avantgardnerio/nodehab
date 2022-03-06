@@ -1,6 +1,9 @@
 const { Driver } = require("zwave-js");
 const webPush = require("web-push");
+const path = require('path');
 const fs = require('fs');
+const fsp = fs.promises;
+const exif = require('fast-exif');
 const express = require('express')
 const bodyParser = require('body-parser')
 const app = express();
@@ -73,6 +76,30 @@ app.get('/api/nodes', async (req, res) => {
 
     res.header("Content-Type",'application/json');
     res.send(JSON.stringify(nodes, null, 3));
+});
+
+app.get('/api/photos', async (req, res) => {
+    const results = [];
+    const directoryName = '/media/bgardner/backup/Backup/Shared/Pictures/';
+    let files = await fsp.readdir(directoryName, {withFileTypes: true});
+    for (let f of files) {
+        const fullPath = path.join(directoryName, f.name);
+    
+        if (f.isDirectory()) {
+            results.push({name: f.name, directory: true}); // TODO: handle dirs
+        } else {
+            const meta = await exif.read(fullPath);
+            if(meta) {
+                if(meta.exif) delete meta.exif.Padding;
+                results.push({name: f.name, exif: meta.exif, gps: meta.gps});
+            } else {
+                results.push({name: f.name});
+            }
+        }
+    }
+    
+    res.header("Content-Type",'application/json');
+    res.send(JSON.stringify(results, null, 3));
 });
 
 app.post('/nodes/heal', async (req, res) => {
