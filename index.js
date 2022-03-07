@@ -20,6 +20,7 @@ const con = {
     allowExitOnIdle: true,
 };
 const db = pgp(con);
+const directoryName = '/media/bgardner/backup/Backup/Shared/Pictures/'; // TODO: move to config
 
 // https://auth0.com/blog/read-edit-exif-metadata-in-photos-with-javascript/
 const getBase64DataFromJpegFile = filename => fs.readFileSync(filename).toString('binary');
@@ -95,9 +96,25 @@ app.get('/api/nodes', async (req, res) => {
     res.send(JSON.stringify(nodes, null, 3));
 });
 
+app.get('/api/photos/:path', async (req, res, next) => {
+    try {
+        const options = {
+            root: directoryName,
+            dotfiles: 'deny',
+            headers: {
+              'x-timestamp': Date.now(),
+              'x-sent': true
+            }
+          }
+          res.sendFile(req.params.path, options, err => next(err));
+    } catch(ex) {
+        console.error('Error in /api/path/:path', ex);
+        res.status(ex.status || 500).send({error: ex.message})
+    }
+});
+
 app.get('/api/photos', async (req, res) => {
     const results = [];
-    const directoryName = '/media/bgardner/backup/Backup/Shared/Pictures/';
     let files = await fsp.readdir(directoryName, {withFileTypes: true});
     for (let f of files) {
         const fullPath = path.join(directoryName, f.name);
