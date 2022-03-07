@@ -4,7 +4,7 @@ export default {
       <div>
         <ul id="example-1">
             <li v-for="item in values" :key="item.name">
-                {{ item.name }}
+                <img :src="'/api/photos/' + item.name" />
             </li>
         </ul>      
       </div>
