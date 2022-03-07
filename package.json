@@ -22,6 +22,7 @@
     "fast-exif": "^1.0.1",
     "nodemon": "^2.0.12",
     "pg-promise": "^10.11.0",
+    "piexifjs": "^1.0.6",
     "sqlite": "^4.0.23",
     "sqlite3": "^5.0.2",
     "vue": "^2.6.14",

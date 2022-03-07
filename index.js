@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const fsp = fs.promises;
 const exif = require('fast-exif');
+const piexif = require('piexifjs');
 const dms2dec = require('dms2dec');
 const express = require('express')
 const bodyParser = require('body-parser')
@@ -19,6 +20,21 @@ const con = {
     allowExitOnIdle: true,
 };
 const db = pgp(con);
+
+// https://auth0.com/blog/read-edit-exif-metadata-in-photos-with-javascript/
+const getBase64DataFromJpegFile = filename => fs.readFileSync(filename).toString('binary');
+const getExifFromJpegFile = filename => piexif.load(getBase64DataFromJpegFile(filename));
+const changeExif = () => {
+    const exif = getExifFromJpegFile('arcteryx.bak.jpg');
+
+    exif['0th'][270] = 'My Comment'; // https://exiftool.org/TagNames/EXIF.html
+
+    const newImageData = getBase64DataFromJpegFile('arcteryx.bak.jpg');
+    const newExifBinary = piexif.dump(exif);
+    const newPhotoData = piexif.insert(newExifBinary, newImageData);
+    let fileBuffer = Buffer.from(newPhotoData, 'binary');
+    fs.writeFileSync('arcteryx.jpg', fileBuffer);
+};
 
 const config = JSON.parse(fs.readFileSync('./data/config.json'));
 const networkKey = Buffer.from(config.networkKey, "hex");
