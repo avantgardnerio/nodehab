@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const fsp = fs.promises;
 const exif = require('fast-exif');
+const dms2dec = require('dms2dec');
 const express = require('express')
 const bodyParser = require('body-parser')
 const app = express();
@@ -91,6 +92,10 @@ app.get('/api/photos', async (req, res) => {
             const meta = await exif.read(fullPath);
             if(meta) {
                 if(meta.exif) delete meta.exif.Padding;
+                if(meta.gps) {
+                    const dec = dms2dec(meta.gps.GPSLatitude, meta.gps.GPSLatitudeRef, meta.gps.GPSLongitude, meta.gps.GPSLongitudeRef);
+                    meta.gps.dec = dec;
+                }
                 results.push({name: f.name, exif: meta.exif, gps: meta.gps});
             } else {
                 results.push({name: f.name});
