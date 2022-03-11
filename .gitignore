@@ -10,3 +10,6 @@ database.json
 data/
 plugins/
 public/webrtc
+
+files.json
+hashes.json
