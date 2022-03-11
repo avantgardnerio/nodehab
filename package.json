@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js",
+    "hash": "node hash.js",
     "db-migrate": "node node_modules/db-migrate/bin/db-migrate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -20,6 +21,7 @@
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
     "fast-exif": "^1.0.1",
+    "image-hash": "^5.0.2",
     "nodemon": "^2.0.12",
     "pg-promise": "^10.11.0",
     "piexifjs": "^1.0.6",
