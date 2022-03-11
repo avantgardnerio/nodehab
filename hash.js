@@ -12,13 +12,14 @@ const imgHash = (path) => {
     })
 }
 
-const hashes = {};
+let hashes = {};
+try {
+    hashes = JSON.parse(fs.readFileSync('hashes.json', 'utf-8'));
+} catch(e) { }
 let files = {};
 try {
     files = JSON.parse(fs.readFileSync('files.json', 'utf-8'));
-} catch(e) {
-    
-}
+} catch(e) { }
 const scan = async (directoryName) => {
     let dir = await fsp.readdir(directoryName, {withFileTypes: true});
     for (let f of dir) {
