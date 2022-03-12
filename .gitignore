@@ -11,5 +11,6 @@ data/
 plugins/
 public/webrtc
 
-files.json
-hashes.json
+*-files.json
+*-hashes.json
+*-dupes.json
