@@ -1,7 +1,23 @@
 const fs = require('fs');
 const fsp = fs.promises;
+const piexif = require('piexifjs');
+
 const path = require('path');
 const { imageHash } = require('image-hash');
+
+// https://auth0.com/blog/read-edit-exif-metadata-in-photos-with-javascript/
+const getBase64DataFromJpegFile = filename => fs.readFileSync(filename).toString('binary');
+const getExifFromJpegFile = filename => piexif.load(getBase64DataFromJpegFile(filename));
+const changeExif = (file, hash) => {
+    const exif = getExifFromJpegFile(file);
+    exif.Exif[piexif.ExifIFD.ImageUniqueID] = hash;
+
+    const newImageData = getBase64DataFromJpegFile(file);
+    const newExifBinary = piexif.dump(exif);
+    const newPhotoData = piexif.insert(newExifBinary, newImageData);
+    const fileBuffer = Buffer.from(newPhotoData, 'binary');
+    fs.writeFileSync(`${file}.jpg`, fileBuffer);
+};
 
 const imgHash = (path) => {
     return new Promise((res, rej) => {
@@ -12,47 +28,24 @@ const imgHash = (path) => {
     })
 }
 
-let hashes = {};
-try {
-    hashes = JSON.parse(fs.readFileSync('hashes.json', 'utf-8'));
-} catch(e) { }
-let files = {};
-try {
-    files = JSON.parse(fs.readFileSync('files.json', 'utf-8'));
-} catch(e) { }
 const scan = async (directoryName) => {
     let dir = await fsp.readdir(directoryName, {withFileTypes: true});
     for (let f of dir) {
         try {
             const fullPath = path.join(directoryName, f.name);
-            if(files[fullPath]) {
-                continue;
-            }
-            if (f.isDirectory()) {
-                fs.writeFileSync('hashes.json', JSON.stringify(hashes, null, 3));
-                fs.writeFileSync('files.json', JSON.stringify(files, null, 3));
-                await scan(fullPath)
-            } else if(['.jpg', '.jpeg'].includes(path.extname(f.name).toLocaleLowerCase())) {
+            const ext = path.extname(f.name).toLocaleLowerCase();
+            if (!f.isDirectory() && ['.jpg', '.jpeg'].includes(ext) && f.name.indexOf('arc') >= 0) {
                 console.log(`Hashing ${fullPath}`);
                 const hash = await imgHash(fullPath);
-
-                files[fullPath] = hash;
-                if(!hashes[hash]) hashes[hash] = [];
-                hashes[hash].push(fullPath);
-                if(hashes[hash].length > 1) {
-                    console.log('Collission!');
-                }
-                console.log(`${fullPath}=${hash}`)
+                changeExif(fullPath, hash);
             }
         } catch(ex) {
             console.error(`Error on file ${f}`, ex);
         }
     }
-    fs.writeFileSync('hashes.json', JSON.stringify(hashes, null, 3));
-    fs.writeFileSync('files.json', JSON.stringify(files, null, 3));
 }
 
-const directoryName = '/media/bgardner/backup/Backup/Shared/Pictures/'; // TODO: move to config
+const directoryName = '/media/bgardner/backup1/Backup/Shared/Pictures/'; // TODO: move to config
 (async () => {
     await scan(directoryName);
 })();
