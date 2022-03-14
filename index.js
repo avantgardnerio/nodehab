@@ -20,7 +20,7 @@ const con = {
     allowExitOnIdle: true,
 };
 const db = pgp(con);
-const directoryName = '/media/bgardner/backup/Backup/Shared/Pictures/'; // TODO: move to config
+const directoryName = '/media/bgardner/backup1/Backup/Shared/Pictures/'; // TODO: move to config
 
 // https://auth0.com/blog/read-edit-exif-metadata-in-photos-with-javascript/
 const getBase64DataFromJpegFile = filename => fs.readFileSync(filename).toString('binary');
