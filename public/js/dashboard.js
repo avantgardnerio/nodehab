@@ -11,11 +11,11 @@ export default {
                     :true-value="item.trueValue" :false-value="item.falseValue"></v-switch>
           <v-text-field v-if="item.type === 'int'" v-model="item.current" type="number" label="Number" disabled 
                         ></v-text-field>
-          <v-select v-if="item.type === 'radio'" v-model="item.current" :items="item.options" disabled></v-select>
+          <v-select v-if="item.type === 'radio'" v-model="item.current" :items="item.options" :disabled="item.write === undefined"
+                    @change="onChange(item, 'current')"></v-select>
         </template>
         <template v-slot:item.target="{ item }" >
           <v-text-field v-if="item.write !== undefined && item.type === 'int'" v-model="item.target" type="number" label="Number" @change="onChange(item)"></v-text-field>
-          <v-select v-if="item.type === 'radio'" v-model="item.target" :items="item.options" @change="onChange(item)"></v-select>
         </template>
       </v-data-table>
       </div>
