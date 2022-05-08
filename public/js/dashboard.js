@@ -14,9 +14,6 @@ export default {
           <v-select v-if="item.type === 'radio'" v-model="item.current" :items="item.options" :disabled="item.write === undefined"
                     @change="onChange(item, 'current')"></v-select>
         </template>
-        <template v-slot:item.target="{ item }" >
-          <v-text-field v-if="item.write !== undefined && item.type === 'int'" v-model="item.target" type="number" label="Number" @change="onChange(item)"></v-text-field>
-        </template>
       </v-data-table>
       </div>
     `,
@@ -30,7 +27,6 @@ export default {
             headers: [
                 { text: 'Name', align: 'left', value: 'name', class: 'tableheader'},
                 { text: 'Current', align: 'left', value: 'current', class: 'tableheader'},
-                { text: 'Target', align: 'left', value: 'target', class: 'tableheader'},
             ],
             values: []
         }
