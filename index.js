@@ -140,10 +140,15 @@ app.post('/nodes/exclude', async (req, res) => {
 });
 
 app.post('/nodes/include', async (req, res) => {
-    const result = await driver.controller.beginInclusion(false);
-    res.header("Content-Type",'application/json');
-    console.log(`Including: `, result);
-    res.send(JSON.stringify(result, null, 3));
+    try {
+        const result = await driver.controller.beginInclusion(false);
+        res.header("Content-Type",'application/json');
+        console.log(`Including: `, result);
+        res.send(JSON.stringify(result, null, 3));
+    } catch(ex) {
+        console.error(`Error including!`, ex);
+        res.status(ex.status || 500).send({error: ex.message})
+    }
 });
 
 app.get('/api/nodes/:id', async (req, res) => {
