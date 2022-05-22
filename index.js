@@ -356,7 +356,7 @@ const notify = async (msg) => {
 
                     // forward to plugins
                     for(let plugin of plugins) {
-                        // console.log(`Plugin updated: `, plugin.constructor.name)
+                        // console.log(`Plugin updated: ${plugin.constructor.name}`)
                         try {
                             await plugin.valueUpdated(node, args);
                         } catch(ex) {
