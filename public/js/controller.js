@@ -4,7 +4,7 @@ export default {
       <v-btn v-on:click="beginInclude">Include a node...</v-btn>
       <v-btn v-on:click="beginExclude">Exclude a node...</v-btn>
       <v-btn v-on:click="beginHeal">Begin healing network...</v-btn>
-      <v-data-table :headers="headers" :items="nodes" @click:row="handleClick" :items-per-page="20">
+      <v-data-table :headers="headers" :items="nodes" @click:row="handleClick" :items-per-page="100">
         <template slot="items" slot-scope="props">
           <tr>
             <td>

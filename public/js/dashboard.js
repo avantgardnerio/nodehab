@@ -5,12 +5,12 @@ export default {
       <div>
       <v-btn v-on:click="subscribe">Subscribe!</v-btn>
       <v-btn v-on:click="install" v-if="canAdd">Install!</v-btn>
-      <v-data-table :headers="headers" :items="values" :items-per-page="20">
+      <v-data-table :headers="headers" :items="values" :items-per-page="100">
         <template v-slot:item.current="{ item }">
           <v-switch v-if="item.type === 'switch'" v-model="item.current" :disabled="item.write === undefined" @change="onChange(item, 'current')"
                     :true-value="item.trueValue" :false-value="item.falseValue"></v-switch>
-          <v-text-field v-if="item.type === 'int'" v-model="item.current" type="number" label="Number" disabled 
-                        ></v-text-field>
+          <v-text-field v-if="item.type === 'int'" v-model="item.current" type="number" label="Number" :disabled="item.write === undefined" 
+                    @change="onChange(item, 'current')"></v-text-field>
           <v-select v-if="item.type === 'radio'" v-model="item.current" :items="item.options" :disabled="item.write === undefined"
                     @change="onChange(item, 'current')"></v-select>
         </template>
