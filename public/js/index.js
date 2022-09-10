@@ -1,12 +1,11 @@
 import Dashboard from './dashboard.js';
 import Controller from './controller.js';
-import Photos from './photos.js';
 import Node from './node.js';
 
 const routes = [
     { path: '/dashboard', component: Dashboard },
     { path: '/controller', component: Controller },
-    { path: '/photos', component: Photos }
+    { path: '/nodes/:id', component: Node },
 ]
 
 const router = new VueRouter({
