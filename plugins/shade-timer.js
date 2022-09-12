@@ -17,12 +17,14 @@ module.exports = async (driver, config, notify, db, opts) => {
         const dateText = new Date(now.getTime() - offset * 60 * 1000).toISOString().split('T')[0];
         const dateTimeText = `${dateText}T${opts.time}${offsetSign}${offsetHours}:${offsetMinutes}`;
         const instant = Date.parse(dateTimeText);
-        const duration = instant - now.getTime();
+        let duration = instant - now.getTime();
+        if(duration <= 0) { 
+            duration = duration + 24 * 60 * 60 * 1000; 
+        }
 
-        console.log(`${dateTimeText} is ${Math.round(duration / 1000 / 60)} minutes from now`);
+        console.log(`Adjusting ${opts.deviceName} at ${dateTimeText} in ${Math.round(duration / 1000 / 60)} minutes from now`);
 
-        if(duration > 0) return duration;
-        return duration + 24 * 60 * 60 * 1000;
+        return duration;
     };
 
     const takeAction = async () => {
