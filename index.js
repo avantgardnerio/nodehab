@@ -259,6 +259,7 @@ app.put('/api/nodes/:id', async (req, res) => {
             endpoint: row.endpoint,
             property: row.property,
             propertyKey: row.propertyKey,
+            propertyKey: row.propertyKey,
         }, row.val);
         res.send(JSON.stringify(true));
     } catch(ex) {
@@ -281,14 +282,16 @@ app.get('/api/dashboard', async (req, res) => {
                     obj.current = await node.getValue({
                         commandClass: obj.commandClass,
                         endpoint: obj.endpoint,
-                        property: obj.read
+                        property: obj.read,
+                        propertyKey: obj.propertyKey,
                     });
                 }
                 if (obj.write) {
                     obj.target = await node.getValue({
                         commandClass: obj.commandClass,
                         endpoint: obj.endpoint,
-                        property: obj.write
+                        property: obj.write,
+                        propertyKey: obj.propertyKey,
                     });
                 }
             }

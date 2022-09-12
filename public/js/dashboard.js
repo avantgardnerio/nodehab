@@ -59,9 +59,9 @@ export default {
             deferredPrompt.prompt();
             deferredPrompt.userChoice.then((choiceResult) => {
                 if (choiceResult.outcome === 'accepted') {
-                console.log('User accepted the A2HS prompt');
+                    console.log('User accepted the A2HS prompt');
                 } else {
-                console.log('User dismissed the A2HS prompt');
+                    console.log('User dismissed the A2HS prompt');
                 }
                 deferredPrompt = null;
             });
@@ -70,7 +70,7 @@ export default {
             if(item.type === 'int') {
                 item[model] = parseInt(item[model]);
             }
-            const obj = {commandClass: item.commandClass, endpoint: item.endpoint, property: item.write, val: item[model]};
+            const obj = {commandClass: item.commandClass, endpoint: item.endpoint, property: item.write, propertyKey: item.propertyKey, val: item[model]};
             console.log(obj);
             await fetch(`/api/nodes/${item.node}`, {
                 method: 'PUT',
