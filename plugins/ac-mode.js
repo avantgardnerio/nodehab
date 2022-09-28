@@ -1,4 +1,4 @@
-const modeCommandClass = 64;
+const thermostatCommandClass = 64;
 const temperatureCommandClass = 67;
 const thermometerCommandClass = 49;
 const thermometerProperty = `Air temperature`;
@@ -10,26 +10,28 @@ const modes = {
 };
 
 module.exports = async (driver, config, notify, db, opts) => {
-    const deviceId = parseInt(Object.keys(config.nodes).find(k => config.nodes[k] === opts.deviceName));
-    const device = driver.controller.nodes.get(deviceId);
-    console.log(`Thermostat=${deviceId}`);
+    const thermometerId = parseInt(Object.keys(config.nodes).find(k => config.nodes[k] === opts.thermometer));
+    const thermometer = driver.controller.nodes.get(thermometerId);
+    const thermostatId = parseInt(Object.keys(config.nodes).find(k => config.nodes[k] === opts.thermostat));
+    const thermostat = driver.controller.nodes.get(thermostatId);
+    console.log(`Thermostat=${thermostatId} thermometerId=${thermometerId}`);
 
     const update = async (temp) => {
-        const mode = await device.getValue({ commandClass: modeCommandClass, endpoint: 0, property: "mode" });
+        const mode = await thermostat.getValue({ commandClass: thermostatCommandClass, endpoint: 0, property: "mode" });
         if(temp > opts.max && mode !== modes.cool) {
-            console.log(`${temp} exceeded temperature threshold, setting A/C to 'cool'...`);
-            await device.setValue({commandClass: modeCommandClass, property: "mode"}, modes.cool);
+            console.log(`${opts.thermometer} exceeded temperature threshold ${temp}, setting A/C to 'cool'...`);
+            await thermostat.setValue({commandClass: thermostatCommandClass, property: "mode"}, modes.cool);
         }
         if(temp < opts.min && mode !== modes.heat) {
-            console.log(`${temp} exceeded temperature threshold, setting A/C to 'heat'...`);
-            await device.setValue({commandClass: modeCommandClass, property: "mode"}, modes.heat);
+            console.log(`${opts.thermometer} exceeded temperature threshold ${temp}, setting A/C to 'heat'...`);
+            await thermostat.setValue({commandClass: thermostatCommandClass, property: "mode"}, modes.heat);
         }
     };
-    update(await device.getValue({ commandClass: thermometerCommandClass, property: thermometerProperty }));
+    update(await thermostat.getValue({ commandClass: thermometerCommandClass, property: thermometerProperty }));
 
     return {
         valueUpdated: async (node, args) => {
-            if(node.nodeId !== device.nodeId) return;
+            if(node.nodeId !== thermometer.nodeId) return;
             if(args.commandClass !== thermometerCommandClass) return;
             if(args.property !== thermometerProperty) return;
             await update(args.newValue);
