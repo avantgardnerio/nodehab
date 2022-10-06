@@ -65,6 +65,9 @@ export default {
             if(!isNaN(val) && !isNaN(parseFloat(val))) {
                 row.val = parseFloat(val);
             }
+            if(val.startsWith('"') && val.endsWith('"')) {
+                row.val = val.replace(/^\"+|\"+$/g, "");
+            }
             console.log(`${new Date()} setting ${row.commandClass} ${row.prop} to ${row.val}`);
             await fetch(`/api/nodes/${this.$route.params.id}`, {
                 method: 'PUT',
