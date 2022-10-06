@@ -336,7 +336,9 @@ const notify = async (msg) => {
                 const plugin = require(`./plugins/${file}`);
                 for(const opts of instances) {
                     const instance = await plugin(driver, config, notify, db, opts);
-                    plugins.push(instance);
+                    if(instance) {
+                        plugins.push(instance);
+                    }
                 }
             } catch(ex) {
                 console.error(`Error loading plugin: ${file}`, ex);
