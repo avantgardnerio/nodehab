@@ -3,6 +3,8 @@ const propertyKey = `Motion sensor status`;
 
 module.exports = async (driver, config, notify, db, opts) => {
     let currentState;
+
+    if(!opts.enabled) return;
     
     const sensorId = parseInt(Object.keys(config.nodes).find(k => config.nodes[k] === opts.sensorName));
     const sensor = driver.controller.nodes.get(sensorId);
