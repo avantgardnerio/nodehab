@@ -25,6 +25,9 @@ const config = JSON.parse(fs.readFileSync('./data/config.json'));
 const networkKey = Buffer.from(config.networkKey, "hex");
 const options = {
     networkKey,
+    storage: {
+        cacheDir: "/home/bgardner/workspace/nodehab/data/cache"
+    }
 };
 
 if(!config.vapidKeys) {
