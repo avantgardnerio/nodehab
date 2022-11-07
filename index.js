@@ -19,14 +19,16 @@ const con = {
     allowExitOnIdle: true,
 };
 const db = pgp(con);
-const directoryName = '/media/bgardner/backup1/Backup/Shared/Pictures/'; // TODO: move to config
+const c = '/media/bgardner/backup1/Backup/Shared/Pictures/'; // TODO: move to config
 
+const cacheDir = path.join(__dirname, '/data/cache');
+console.log(`Storing zwave-js cache in ${cacheDir}`);
 const config = JSON.parse(fs.readFileSync('./data/config.json'));
 const networkKey = Buffer.from(config.networkKey, "hex");
 const options = {
     networkKey,
     storage: {
-        cacheDir: "/home/bgardner/workspace/nodehab/data/cache"
+        cacheDir
     }
 };
 
