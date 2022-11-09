@@ -59,12 +59,16 @@ app.get('/api/vapid/publicKey', (req, res) => {
 });
 
 app.post('/api/push/register', async (req, res) => {
-    // console.log(`Register ${JSON.stringify(req.body, null, 3)}`);
-    await db.none('insert into subscriptions (subscription) values ($1) on conflict do nothing;',
-        [JSON.stringify(req.body)]
-    );
-    res.header("Content-Type",'application/json');
-    res.send(JSON.stringify(true, null, 3));
+    try {
+        // console.log(`Register ${JSON.stringify(req.body, null, 3)}`);
+        await db.none('insert into subscriptions (subscription) values ($1) on conflict do nothing;',
+            [JSON.stringify(req.body)]
+        );
+        res.header("Content-Type",'application/json');
+        res.send(JSON.stringify(true, null, 3));
+    } catch(ex) {
+        console.error('register error', ex);
+    }
 })
 
 app.get('/api/nodes', async (req, res) => {
@@ -314,18 +318,22 @@ app.use((error, req, res, next) => {
 });
 
 const notify = async (msg) => {
-    const subscriptions = await db.many('select * from subscriptions');
-    for(let subscription of subscriptions) {
-        try {
-            console.log(`Notifying subscription ${subscription.id} ${msg}`);
-            await webPush.sendNotification(subscription.subscription, msg);
-        } catch(ex) {
-            console.error(`Error pushing notification: ${ex.statusCode}`, ex);
-            if(ex.statusCode >= 400 && ex.statusCode < 500) {
-                console.warn(`Removing dead subscription ${subscription.id}...`);
-                await db.none(`delete from subscriptions where id=$1`, [subscription.id]);
+    try {
+        const subscriptions = await db.many('select * from subscriptions');
+        for(let subscription of subscriptions) {
+            try {
+                console.log(`Notifying subscription ${subscription.id} ${msg}`);
+                await webPush.sendNotification(subscription.subscription, msg);
+            } catch(ex) {
+                console.error(`Error pushing notification: ${ex.statusCode}`, ex);
+                if(ex.statusCode >= 400 && ex.statusCode < 500) {
+                    console.warn(`Removing dead subscription ${subscription.id}...`);
+                    await db.none(`delete from subscriptions where id=$1`, [subscription.id]);
+                }
             }
         }
+    } catch(ex) {
+        console.error('notify error', ex);
     }
 };
 
