@@ -119,6 +119,22 @@ module.exports = class KegHeater {
 
 ## creating migrations
 
+`database.json`:
+
+```json
+{
+    "dev": {
+      "driver": "pg",
+      "user": "postgres",
+      "password": "postgres",
+      "host": "127.0.0.1",
+      "database": "postgres",
+      "port": "5432",
+      "schema": "postgres"
+    }
+}
+```
+
 ```sh
 npm run db-migrate -- create <my-name> --sql-file
 ```

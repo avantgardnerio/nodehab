@@ -15,7 +15,7 @@ const con = {
     port: process.env.DB_PORT || 5432,
     database: process.env.DB_NAME || 'postgres',
     user: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASS,
+    password: process.env.DB_PASS || 'postgres',
     allowExitOnIdle: true,
 };
 const db = pgp(con);
@@ -260,9 +260,10 @@ app.post('/api/nodes/:id/remove', async (req, res) => {
 
 app.put('/api/nodes/:id', async (req, res) => {
     try {
-        const node = driver.controller.nodes.get(parseInt(req.params.id));
+        const nodeId = parseInt(req.params.id);
+        const node = driver.controller.nodes.get(nodeId);
         const row = req.body;
-        console.log(`${new Date()} setting ${row.commandClass} ${row.prop} to ${row.val}`);
+        console.log(`${new Date()} setting ${nodeId} ${row.prop} to ${row.val}`);
         await node.setValue({
             commandClass: row.commandClass,
             endpoint: row.endpoint,
