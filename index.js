@@ -7,6 +7,7 @@ const exif = require('fast-exif');
 const dms2dec = require('dms2dec');
 const express = require('express')
 const bodyParser = require('body-parser')
+const cors = require('cors');
 const app = express();
 const initOptions = {};
 const pgp = require('pg-promise')(initOptions);
@@ -52,6 +53,10 @@ driver.on("error", (e) => {
 app.use(bodyParser());
 app.use(express.static('node_modules'))
 app.use(express.static('public'));
+
+app.use(cors({
+    origin: /^http:\/\/localhost:[0-9]{1,5}$/
+}));
 
 app.get('/api/vapid/publicKey', (req, res) => {
     res.header("Content-Type",'application/json');

@@ -14,6 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
     "db-migrate": "^0.11.12",
     "db-migrate-pg": "^1.2.2",
     "dms2dec": "^1.1.0",
